@@ -10,7 +10,11 @@ class AIService:
     def __init__(self):
         self.client = OpenAI()
 
-    def get_response(self, prompt: str) -> Response:
-        response = self.client.responses.create(model="gpt-4.1", input=prompt)
+    def get_response(self, prompt: str, instructions: str) -> Response:
+        response = self.client.responses.create(
+            model="gpt-4.1",
+            instructions=instructions,
+            input=prompt,
+        )
 
         return response
