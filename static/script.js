@@ -187,7 +187,7 @@ async function sendChatMessage(message) {
 
   try {
     // Simulate AI response (replace with actual API call)
-    const response = await simulateAIResponse(message);
+    const response = await AIResponse(message);
     addBotMessage(response);
   } catch (error) {
     addBotMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
@@ -195,6 +195,28 @@ async function sendChatMessage(message) {
   } finally {
     showLoading(false);
   }
+}
+
+// Send Request to ChatAPI Endpoint
+async function AIResponse(prompt) {
+  const url = "http://127.0.0.1:5000/api/v1/chat";
+  const fetchData = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ query: prompt }),
+  }
+
+  const response = await fetch(url, fetchData)
+    .then((response) => {
+      return response
+    })
+    .catch((error) => {
+      console.log(error)
+    });
+
+  return await response.text()
 }
 
 
