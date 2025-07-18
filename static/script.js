@@ -186,9 +186,10 @@ async function sendChatMessage(message) {
   showLoading(true);
 
   try {
-    // Simulate AI response (replace with actual API call)
     const response = await AIResponse(message);
-    addBotMessage(response);
+    overlayLayers[response.layer].addTo(map);
+
+    addBotMessage(response.reason);
   } catch (error) {
     addBotMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
     console.error('Chat error:', error);
@@ -208,15 +209,23 @@ async function AIResponse(prompt) {
     body: JSON.stringify({ query: prompt }),
   }
 
-  const response = await fetch(url, fetchData)
-    .then((response) => {
-      return response
-    })
-    .catch((error) => {
-      console.log(error)
-    });
+  try {
+    const response = await fetch(url, fetchData);
 
-  return await response.text()
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    // Rseponse Output:
+    // { "layer": "HI_State_80prob_9ft_GWI", "foot_increment": 9, "reason": "Statewide flooding data at the 9 foot level as specifically requested." }
+    // TODO: Validate format of the response probably serverside
+    const jsonData = await response.json();
+    return jsonData;
+  }
+  catch (error) {
+    console.log(error);
+    return null;
+  }
 }
 
 
@@ -319,46 +328,26 @@ function initializeBaseLayers() {
 // Initialize WMS overlay layers
 function initializeWMSLayers() {
   // Sample WMS layers for climate data
-  const wmsLayers = [
-    {
+  const wmsLayers = [];
+
+  const gwi_layer_config = (ft) => {
+    return {
       tiled: true,
       transparent: true,
       opacity: 0.7,
       maxZoom: 19,
       srs: 'EPSG:3857',
       format: 'image/png',
-      name: 'Passive GWI 03ft all-scenarios',
+      name: ft != 10 ? `Passive GWI 0${ft} ft all-scenarios` : `Passive GWI ${ft} ft all-scenarios`,
       url: 'https://crcgeo.soest.hawaii.edu/geoserver/gwc/service/wms',
-      layers: 'CRC:HI_State_80prob_03ft_GWI',
-    },
-    {
-      name: 'Precipitation',
-      url: 'https://www.ncei.noaa.gov/thredds/wms/gms/',
-      layers: 'precipitation',
-      format: 'image/png',
-      transparent: true,
-      opacity: 0.6,
-      attribution: 'NOAA NCEI'
-    },
-    {
-      name: 'Sea Surface Temperature',
-      url: 'https://coastwatch.pfeg.noaa.gov/erddap/wms/erdMWsstd1day/',
-      layers: 'sst',
-      format: 'image/png',
-      transparent: true,
-      opacity: 0.8,
-      attribution: 'NOAA CoastWatch'
-    },
-    {
-      name: 'Global Temperature',
-      url: 'https://www.ncei.noaa.gov/thredds/wms/griddata-ncep-rr-6h-1p0-2p5km-agg-grib2/',
-      layers: 'Temperature_surface',
-      format: 'image/png',
-      transparent: true,
-      opacity: 0.7,
-      attribution: 'NOAA NCEI'
+      layers: ft != 10 ? `CRC:HI_State_80prob_0${ft}ft_GWI` : `CRC:HI_State_80prob_${ft}ft_GWI`,
     }
-  ];
+  };
+
+  for (let i = 0; i < 11; i++) {
+    wmsLayers.push(gwi_layer_config(i));
+  }
+
 
   // Create WMS layers and add to overlay layers
   wmsLayers.forEach(layerConfig => {
