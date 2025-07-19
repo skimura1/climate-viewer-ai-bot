@@ -187,7 +187,14 @@ async function sendChatMessage(message) {
 
   try {
     const response = await AIResponse(message);
+    const boundaries = response.boundaries
+    const bounds = L.latLngBounds(
+      [boundaries.south, boundaries.west], // Southwest
+      [boundaries.north, boundaries.east]  // Northeast
+    );
+
     overlayLayers[response.layer].addTo(map);
+    map.fitBounds(bounds);
 
     addBotMessage(response.reason);
   } catch (error) {
