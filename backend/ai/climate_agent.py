@@ -1,3 +1,6 @@
+from context_manager import ContextManager
+from backend.service.open_ai_service import OpenAIService
+from backend.models.chat import ChatContext
 
 """Single Climate Agent Handling Climate Queries"""
 
@@ -5,8 +8,9 @@
 class ClimateAgent:
     def __init__(self):
         self.openai_service = OpenAIService()
-        self.geoserver_service = GeoserverService()
-        self.context_manager = ContextManger()
+        # self.geoserver_service = GeoserverService()
+        self.context_manager = ContextManager()
+        self.data_catalog = DataCatalog()
 
     async def process_query(self, query: str, session_id: str) -> Response:
         """Main Entry Point - Handle all queries"""
@@ -22,15 +26,15 @@ class ClimateAgent:
         # actions = self._parse_actions(response)
         # result = await self._execute_actions(actions)
 
-        self.context_manager.update_context(session_id, query, response)
+        await self.context_manager.update_context(session_id, query, response)
         return self._format_response(response)
 
     async def _generate_response(self, query: str, context: ChatContext) -> str:
         """Generate response using single comprehensive prompt"""
         prompt = self._build_comprehensive_prompt(query, context)
-        return self.openai_service.chat_completion(prompt)
+        return self.openai_service.get_response(prompt)
 
-    def _build_comprehensive_prompt(query: str, context: ChatContext) -> str:
+    def _build_comprehensive_prompt(self, query: str, context: ChatContext) -> str:
         """Build Single Prompt for all functionality"""
         return f"""
         You are a Hawaiian climate data assistant. Handle this query: "{query}"
@@ -59,4 +63,17 @@ class ClimateAgent:
         }}
         """
 
-    def _format_response(response: str) -> str
+    def _format_response(self, response: str) -> ChatResponse:
+        return f"""
+            {
+            "layer": "CRC:HI_Oahu_inundation_06ft", 
+            "foot_increment": "6", 
+            "boundaries": {
+                "north": 21.6500, 
+                "south": 21.3090, 
+                "east": -157.6500, 
+                "west": -157.9000
+                },
+            "reason": "Oahu-specific flooding data at 6 foot level"
+            }
+        """

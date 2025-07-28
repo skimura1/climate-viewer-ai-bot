@@ -21,3 +21,16 @@ class LayerData(BaseModel):
 
 class ChatResponse(BaseModel):
     data: LayerData
+
+
+class Message(BaseModel):
+    role: str
+    content: str
+    timestamp: str
+
+
+class ChatContext(BaseModel):
+    session_id: str
+    messages: list[Message]
+    map_bounds: str
+    active_layers: list[str]

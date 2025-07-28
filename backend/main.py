@@ -1,9 +1,7 @@
 import os
 import json
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ValidationError
-from openai import OpenAI
-from openai.types.responses.response import Response
+from pydantic import ValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -21,22 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-class AIService:
-    """Service class for handling calls to AI Endpoint."""
-
-    def __init__(self):
-        self.client = OpenAI()
-
-    def get_response(self, prompt: str, instructions: str) -> Response:
-        response = self.client.responses.create(
-            model="gpt-4.1",
-            instructions=instructions,
-            input=prompt,
-        )
-
-        return response
 
 
 @app.get("/")
