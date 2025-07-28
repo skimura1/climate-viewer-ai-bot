@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.116.1",
     "openai>=1.91.0",
+    "pydantic>=2.11.7",
     "python-dotenv>=1.1.1",
     "requests>=2.32.4",
 ]
@@ -18,3 +19,8 @@ dev = [
     "pytest>=8.4.1",
     "types-requests>=2.32.4.20250611",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*"]
+exclude = ["fronted*", "*.tests*", "tests*"]
