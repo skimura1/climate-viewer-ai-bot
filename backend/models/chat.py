@@ -12,15 +12,10 @@ class Boundaries(BaseModel):
     west: float
 
 
-class LayerData(BaseModel):
-    layer: str
+class MapStateData(BaseModel):
+    active_layers: list[str]
     foot_increment: str
-    boundaries: Boundaries
-    reason: str
-
-
-class ChatResponse(BaseModel):
-    data: LayerData
+    current_map_position: Boundaries
 
 
 class Message(BaseModel):
@@ -32,5 +27,4 @@ class Message(BaseModel):
 class ChatContext(BaseModel):
     session_id: str
     messages: list[Message]
-    map_bounds: str
-    active_layers: list[str]
+    map_state: MapStateData

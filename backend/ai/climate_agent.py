@@ -1,5 +1,6 @@
 from context_manager import ContextManager
 from backend.service.open_ai_service import OpenAIService
+from backend.service.map_service import MapService
 from backend.models.chat import ChatContext
 
 """Single Climate Agent Handling Climate Queries"""
@@ -10,13 +11,16 @@ class ClimateAgent:
         self.openai_service = OpenAIService()
         # self.geoserver_service = GeoserverService()
         self.context_manager = ContextManager()
-        self.data_catalog = DataCatalog()
+        self.map_service = MapService()
+        # self.data_catalog = DataCatalog()
 
     async def process_query(self, query: str, session_id: str) -> Response:
         """Main Entry Point - Handle all queries"""
 
         # Get Context
-        context = self.context_manager.get_context(session_id)
+        context = self.context_manager.get_context(
+            session_id, map_state=self.map_service.get_state()
+        )
 
         # Get Response from AI service
         response = await self._generate_response(query, context)
