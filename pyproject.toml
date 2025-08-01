@@ -1,5 +1,5 @@
 [project]
-name = "climate-viewer-ai-bot-fastapi"
+name = "climate-viewer-ai-bot"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -14,13 +14,70 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
-    "mypy>=1.16.1",
     "pytest>=8.4.1",
+    "ruff>=0.12.7",
+    "basedpyright>=1.21.0",
     "types-requests>=2.32.4.20250611",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["backend*"]
-exclude = ["fronted*", "*.tests*", "tests*"]
+exclude = ["frontend*", "*.tests*", "tests*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings  
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "PERF",   # perflint
+    "FURB",   # refurb
+    "RUF",    # ruff-specific rules
+]
+
+# Let basedpyright handle these
+ignore = [
+    "F401",   # unused-import
+    "F821",   # undefined-name
+    "F841",   # unused-variable
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # Allow asserts in tests
+
+# Basedpyright configuration
+[tool.basedpyright]
+typeCheckingMode = "basic"
+reportMissingImports = true
+reportMissingTypeStubs = false
+pythonVersion = "3.11"
+pythonPlatform = "All"
+
+# Include/exclude paths
+include = ["backend"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "frontend"  
+]
+
+# Enable useful diagnostics
+reportUnusedImport = "warning"
+reportUnusedVariable = "warning"
+reportDuplicateImport = "warning"
