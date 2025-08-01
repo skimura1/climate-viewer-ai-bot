@@ -1,4 +1,4 @@
-from backend.models.chat import Boundaries, MapStateData
+from backend.models.chat import MapState
 
 
 class MapService:

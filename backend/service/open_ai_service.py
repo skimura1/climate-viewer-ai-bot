@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
+
 from openai import OpenAI
 from openai.types.responses.response import Response
-from typing import Optional, TypeVar, Generic
 
 T = TypeVar("T")
 
@@ -10,7 +11,7 @@ class AIService(ABC, Generic[T]):
     """Abstract AI Service"""
 
     @abstractmethod
-    def get_response(self, prompt: str, instructions: str) -> Optional[T]:
+    def get_response(self, prompt: str) -> T | None:
         pass
 
 
@@ -20,10 +21,9 @@ class OpenAIService(AIService):
     def __init__(self):
         self.client = OpenAI()
 
-    def get_response(self, prompt: str, instructions: str) -> Optional[Response]:
+    def get_response(self, prompt: str) -> Response:
         response = self.client.responses.create(
             model="gpt-4.1",
-            instructions=instructions,
             input=prompt,
         )
 
