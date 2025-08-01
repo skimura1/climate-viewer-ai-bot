@@ -1,21 +1,21 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
-class ChatRequest(BaseModel):
-    query: str
-
-
-class Boundaries(BaseModel):
+class MapBounds(BaseModel):
     north: float
     south: float
     east: float
     west: float
+    zoom: int
 
 
-class MapStateData(BaseModel):
+class MapState(BaseModel):
     active_layers: list[str]
+    center: dict[str, float]
     foot_increment: str
-    current_map_position: Boundaries
+    current_map_position: MapBounds
 
 
 class Message(BaseModel):
@@ -27,4 +27,13 @@ class Message(BaseModel):
 class ChatContext(BaseModel):
     session_id: str
     messages: list[Message]
-    map_state: MapStateData
+
+
+class ChatRequest(BaseModel):
+    query: str
+    map_state: MapState
+
+
+class ChatResponse(BaseModel):
+    response: str
+    map_actions: list[dict[str, Any]] | None = None
