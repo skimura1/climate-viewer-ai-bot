@@ -21,10 +21,13 @@ class OpenAIService(AIService):
     def __init__(self):
         self.client = OpenAI()
 
-    def get_response(self, prompt: str) -> Response:
-        response = self.client.responses.create(
-            model="gpt-4.1",
-            input=prompt,
+    def get_response(self, prompt: str):
+        response = self.client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
         )
 
         return response

@@ -1,16 +1,20 @@
-import os
 import json
-from fastapi import FastAPI, HTTPException
-from pydantic import ValidationError
-from fastapi.middleware.cors import CORSMiddleware
+import os
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
+
+from ai.climate_agent import ClimateAgent
+from models.chat import ChatRequest
 
 load_dotenv()
 open_ai_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-origins = ["http://localhost:4000", "https://localhost:4000"]
+origins = ["http://localhost:8000", "https://localhost:8000", "http://localhost:3000", "https://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,97 +31,29 @@ async def root():
 
 
 @app.post("/chat", status_code=201)
-def chat(chat_request: ChatRequest):
+async def chat(chat_request: ChatRequest):
     try:
         query = chat_request.query
-        aiservice = AIService()
-        instructions = """
-You are a GeoServer layer selection assistant for Hawaii sea level rise and flooding data. Your job is to analyze user requests and select exactly ONE layer with the appropriate foot increment.
+        map_state = chat_request.map_state
 
-AVAILABLE LAYER TEMPLATES:
-- Passive GWI ${ft} ft all-scenarios: Statewide 80% probability flooding data
+        climate_agent = ClimateAgent()
 
-LOCATION COORDINATES:
-- Waikiki: {
-    north: 21.2830,
-    south: 21.2570,
-    east: -157.8050,
-    west: -157.8350
-    }
-- Koolaupoko: {
-    north: 21.6500,
-    south: 21.3090,
-    east: -157.6500,
-    west: -157.9000
-    }
+        response = await climate_agent.process_query(query=query,
+                                               map_state=map_state,
+                                               session_id="0")
 
-PARAMETERS:
-- {ft}: Foot increment from 0-10 (00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10)
-
-RULES:
-1. Select exactly ONE layer that best matches the user's request
-2. Choose appropriate foot increment (0-10ft) based on user's scenario
-3. If no specific footage mentioned, default to 3ft
-4. If location is specified, prioritize location-specific layers and return a boundaries for that location
-5. Choose the most relevant layer type for the user's interest
-6. If location is not specified, set boundaries to null 
-
-OUTPUT FORMAT:
-{
-  "layer": "complete_layer_name_with_values_filled_in",
-  "foot_increment": string,
-  "boundaries": "Location of interest boundaries in this format {"north": number, "south": number, "east": number, "west": number}",
-  "reason": "Brief explanation of layer and footage choice"
-}
-
-EXAMPLES:
-User: "Show me 6 foot flooding in Koolaupoko"
-Response: {
-"layer": "CRC:HI_Oahu_inundation_06ft", 
-"foot_increment": "6", 
-"boundaries": {
-    "north": 21.6500, 
-    "south": 21.3090, 
-    "east": -157.6500, 
-    "west": -157.9000
-    },
-"reason": "Oahu-specific flooding data at 6 foot level"
-}
-
-User: "What areas flood in Waikiki?"
-Response: {
-"layer": "CRC:Waikiki_compound_prelim_03ft", 
-"foot_increment": "3", 
-"boundaries": {
-    "north": 21.2830,
-    "south": 21.2570,
-    "east": -157.8050,
-    "west": -157.8350
-    },
-"reason": "Waikiki-specific compound flooding data at default 3ft level"
-}
-        """
-
-        response = aiservice.get_response(prompt=query, instructions=instructions)
-
-        raw_message = response.output_text
-
-        parsed_data = json.loads(raw_message)
-
-        validated_data = LayerData.model_validate(parsed_data)
-
-        return ChatResponse(data=validated_data)
+        return response
 
     except json.JSONDecodeError as e:
         raise HTTPException(
             status_code=500,
             detail={"error": "Invalid JSON from AI response", "Details": str(e)},
-        )
+        ) from e
     except ValidationError as e:
         # Handle validation errors
         raise HTTPException(
             status_code=400,
             detail={"error": "AI response validation failed", "errors": e.errors()},
-        )
+        ) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"errors": str(e)})
+        raise HTTPException(status_code=500, detail={"errors": str(e)}) from e

@@ -8,14 +8,16 @@ class MapBounds(BaseModel):
     south: float
     east: float
     west: float
-    zoom: int
 
+class MapCenter(BaseModel):
+    lat: float
+    long: float
 
 class MapState(BaseModel):
-    active_layers: list[str]
-    center: dict[str, float]
+    active_layers: list[str] | None
     foot_increment: str
-    current_map_position: MapBounds
+    map_position: MapBounds
+    zoom_level: int
 
 
 class Message(BaseModel):

@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from backend.models.chat import (
+from models.chat import (
     ChatContext,
     Message,
 )
