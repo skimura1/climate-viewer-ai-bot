@@ -1,0 +1,24 @@
+{
+  "name": "climate-viewer-ai-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Interactive climate data visualization with AI-powered insights",
+  "main": "main.js",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "dev": "python -m http.server 8080"
+  },
+  "keywords": [
+    "climate",
+    "visualization",
+    "ai",
+    "leaflet",
+    "maps"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2",
+    "ultracite": "5.1.2"
+  }
+}
