@@ -35,8 +35,8 @@ export const MAP_CONFIG: MapConfig = {
 
   // Map settings
   settings: {
-    zoomLevel: 8, // Adjusted for Hawaiian Islands view
-    minZoom: 6,
+    zoomLevel: 12,
+    minZoom: 7,
     maxZoom: 19,
     preferCanvas: true,
   },
@@ -52,4 +52,3 @@ export const MAP_CONFIG: MapConfig = {
   crcgeoWFS: CRC_GEO_WFS_CONFIG,
   crcgeoMVT: CRC_GEO_MVT_CONFIG,
 }
-

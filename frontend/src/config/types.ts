@@ -18,6 +18,7 @@ export interface MapSettings {
 export interface MapboxConfig {
   url: string
   attribution: string
+  accessToken: string
   options: {
     maxZoom: number
     tileSize: number

@@ -4,6 +4,7 @@ export const MAPBOX_CONFIG: MapboxConfig = {
   url: 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
   attribution:
     '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
   options: {
     maxZoom: 19,
     tileSize: 512,
@@ -37,3 +38,4 @@ export const CRC_GEO_MVT_CONFIG: MVTConfig = {
   url: (layerName: string): string =>
     `https://crcgeo.soest.hawaii.edu/geoserver/gwc/service/tms/1.0.0/${layerName}@EPSG%3A900913@pbf/{z}/{x}/{-y}.pbf`,
 }
+
