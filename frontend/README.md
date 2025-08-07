@@ -1,64 +1,69 @@
-# Climate Viewer AI Bot Frontend
+# React + TypeScript + Vite
 
-This project has been converted to use ES6 modules for better code organization and maintainability.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Project Structure
+Currently, two official plugins are available:
 
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      ...tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      ...tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      ...tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-frontend/
-├── main.js                      # Main application entry point
-├── modules/
-│   ├── mapManager.js           # Map initialization and management
-│   ├── chatManager.js          # Chat interface and AI communication
-│   └── eventManager.js         # Event handling and user interactions
-├── climate_viewer_tracker.js   # Layer tracking utility (ES6 module)
-├── index.html                  # Main HTML file
-├── styles.css                  # Styles
-└── package.json               # Module configuration
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-## Module Overview
-
-### MapManager (`modules/mapManager.js`)
-- Handles Leaflet map initialization
-- Manages base layers and WMS overlay layers
-- Provides fullscreen functionality
-- Handles location services
-
-### ChatManager (`modules/chatManager.js`)
-- Manages chat interface
-- Handles AI communication with backend
-- Processes user messages and bot responses
-- Manages loading states
-
-### EventManager (`modules/eventManager.js`)
-- Handles map click events
-- Manages keyboard shortcuts
-- Coordinates user interface interactions
-
-### ClimateViewerLayerTracker (`climate_viewer_tracker.js`)
-- Tracks active map layers
-- Provides layer management utilities
-- Maintains map state information
-
-## Running the Application
-
-1. Start a local HTTP server:
-   ```bash
-   npm start
-   # or
-   python -m http.server 8080
-   ```
-
-2. Open your browser to `http://localhost:8080`
-
-## ES6 Module Features
-
-- **Import/Export**: Clean module boundaries with explicit imports and exports
-- **Encapsulation**: Each module manages its own state and functionality
-- **Maintainability**: Easier to understand, test, and modify individual components
-- **Modern JavaScript**: Uses contemporary JavaScript patterns and syntax
-
-## Browser Compatibility
-
-This application requires a modern browser that supports ES6 modules (ES2015+). All major browsers released after 2017 support ES6 modules natively.
