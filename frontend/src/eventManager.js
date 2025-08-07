@@ -47,4 +47,3 @@ export class EventManager {
 		// For example, adding markers, showing popups, etc.
 	}
 }
-

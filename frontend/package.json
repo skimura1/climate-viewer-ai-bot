@@ -1,24 +1,29 @@
 {
-  "name": "climate-viewer-ai-bot",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "Interactive climate data visualization with AI-powered insights",
-  "main": "main.js",
-  "scripts": {
-    "start": "python -m http.server 8080",
-    "dev": "python -m http.server 8080"
-  },
-  "keywords": [
-    "climate",
-    "visualization",
-    "ai",
-    "leaflet",
-    "maps"
-  ],
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@biomejs/biome": "2.1.2",
-    "ultracite": "5.1.2"
-  }
+	"name": "climate-viewer-ai-bot",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Interactive climate data visualization with AI-powered insights",
+	"main": "main.js",
+	"keywords": [
+		"climate",
+		"visualization",
+		"ai",
+		"leaflet",
+		"maps"
+	],
+	"author": "",
+	"license": "MIT",
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"husky": "^9.1.7",
+		"vite": "^7.0.6"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"format": "biome format",
+		"lint": "biome check",
+		"prepare": "husky"
+	}
 }
