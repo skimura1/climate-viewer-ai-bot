@@ -212,15 +212,7 @@ const MapComponent = () => {
     }
   }, [])
 
-  return (
-    <div
-      ref={mapRef}
-      style={{
-        height: '100vh',
-        width: '100%',
-      }}
-    />
-  )
+  return <div ref={mapRef} className="h-screen w-full" />
 }
 
 export default MapComponent
