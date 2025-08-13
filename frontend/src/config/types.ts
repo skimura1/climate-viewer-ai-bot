@@ -38,6 +38,20 @@ export interface WMSConfig {
   }
 }
 
+export interface WMSLayers {
+  tiled: boolean
+  version: string
+  format: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp'
+  transparent: boolean
+  opacity: number
+  errorTileUrl?: string
+  attribution: string
+  bounds: [[number, number], [number, number]] // [[south, west], [north, east]]
+  maxZoom: number
+  layers: string
+  name: string
+}
+
 export interface WFSConfig {
   url: (layerName: string) => string
   options: {
@@ -72,4 +86,8 @@ export interface BasemapConfig {
   description?: string
   isDefault: boolean
   category: 'street' | 'satellite' | 'hybrid'
+}
+
+export interface ActiveLayersState {
+  [layerId: string]: boolean
 }
