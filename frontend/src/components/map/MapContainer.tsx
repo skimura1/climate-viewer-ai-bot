@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MapComponent from './MapComponent'
 import LayerController from './LayerController'
+import Chat from '../chat/Chat'
 import { BASEMAP_CONFIGS } from '@/config/basemaps'
 import type { BasemapConfig, ActiveLayersState } from '@/config/types'
 
@@ -29,6 +30,7 @@ const MapContainer = () => {
         activeLayers={activeLayers}
         onLayerToggle={handleLayerToggle}
       />
+      <Chat />
     </div>
   )
 }
