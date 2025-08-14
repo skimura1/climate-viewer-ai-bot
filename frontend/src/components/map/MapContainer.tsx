@@ -30,7 +30,10 @@ const MapContainer = () => {
         activeLayers={activeLayers}
         onLayerToggle={handleLayerToggle}
       />
-      <Chat />
+      <Chat 
+        activeLayers={activeLayers}
+        onLayerToggle={handleLayerToggle}
+      />
     </div>
   )
 }

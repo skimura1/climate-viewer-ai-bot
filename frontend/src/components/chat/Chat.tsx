@@ -5,49 +5,114 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
+import type { ActiveLayersState } from '@/config/types'
+import { GWI_LAYERS } from '@/config/wmslayers'
 
 interface Message {
   id: string
-  text: string
-  sender: 'user' | 'bot'
+  content: string
+  role: 'user' | 'bot'
   timestamp: Date
 }
 
-const Chat = () => {
+interface MapState {
+  active_layers: string[]
+  available_layers: string[]
+  foot_increment: string
+  map_position: {
+    north: number
+    south: number
+    east: number
+    west: number
+  }
+  zoom_level: number
+}
+
+interface MapAction {
+  type: string
+  parameters: Record<string, any>
+}
+
+interface ChatProps {
+  activeLayers: ActiveLayersState
+  onLayerToggle: (layerId: string, isActive: boolean) => void
+}
+
+const Chat = ({ onLayerToggle }: ChatProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your climate data assistant. How can I help you explore the map data today?',
-      sender: 'bot',
+      content: 'Hello! I\'m your climate data assistant. How can I help you explore the map data today?',
+      role: 'bot',
       timestamp: new Date()
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
 
-  const handleSendMessage = () => {
+  const handleMapActions = (mapActions: MapAction[]) => {
+    mapActions.forEach((action) => {
+      const { display_name, layer_name, reason } = action.parameters;
+      
+      switch (action.type) {
+        case 'add_layer':
+          onLayerToggle(layer_name, true);
+          break;
+        case 'remove_layer':
+          onLayerToggle(layer_name, false);
+          break;
+      }
+    })
+  }
+
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user',
+      content: inputMessage,
+      role: 'user',
       timestamp: new Date()
     }
-
-    setMessages(prev => [...prev, userMessage])
+    
     setInputMessage('')
 
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'I understand you\'re asking about climate data. Let me help you with that information.',
-        sender: 'bot',
-        timestamp: new Date()
+    const mapState: MapState = {
+      active_layers: [],
+      available_layers: GWI_LAYERS.map(layer => layer.layers),
+      foot_increment: '100',
+      map_position: {
+        north: 0,
+        south: 0,
+        east: 0,
+        west: 0,
+      },
+      zoom_level: 10,
       }
-      setMessages(prev => [...prev, botMessage])
-    }, 1000)
+
+    setMessages(prev => [...prev, userMessage])
+
+    const response = await fetch('http://localhost:8000/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: inputMessage, map_state: mapState })
+    })
+    const data = await response.json()
+
+    handleMapActions(data.map_actions);
+
+    const botMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: data.response,
+      role: 'bot',
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, botMessage])
+
   }
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -88,18 +153,18 @@ const Chat = () => {
                     key={message.id}
                     className={cn(
                       'flex',
-                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
                     <div
                       className={cn(
                         'max-w-[80%] rounded-lg px-3 py-2 text-sm',
-                        message.sender === 'user'
+                        message.role=== 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground'
                       )}
                     >
-                      {message.text}
+                      {message.content}
                     </div>
                   </div>
                 ))}

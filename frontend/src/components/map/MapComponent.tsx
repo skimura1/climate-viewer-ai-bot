@@ -81,7 +81,6 @@ const MapComponent = ({ selectedBasemap, activeLayers }: MapComponentProps) => {
 
     const map = mapInstanceRef.current
     const currentLayers = dataLayersRef.current
-
     // Process each layer in activeLayers
     Object.entries(activeLayers).forEach(([layerId, isActive]) => {
       const existingLayer = currentLayers.get(layerId)
