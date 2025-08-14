@@ -54,15 +54,15 @@ class ClimateAgent:
         self, query: str, context: ChatContext, map_state: MapState
     ) -> str:
         bounds_info = f"""Map Position Bounds: 
-        North: {map_state.map_position.north}
-        East: {map_state.map_position.east}
-        South: {map_state.map_position.south}
-        West: {map_state.map_position.west}"""
+        Southwest: {map_state.map_position.southwest}
+        Northeast: {map_state.map_position.northeast}"""
 
-        center_info = f"Map Center: lat: {map_state.map_position.north:.4f}," + \
-            f"long: {map_state.map_position.east:.4f}"
+        center_info = f"Map Center: lat: {map_state.map_position.northeast[0]:.4f}," + \
+            f"long: {map_state.map_position.northeast[1]:.4f}"
 
         chat_history = f"Chat History: {context.messages}"
+
+        basemap_info = f"Current Basemap: {map_state.basemap_name}" if map_state.basemap_name else "No basemap currently selected."
 
         if map_state.active_layers:
             layer_info = "Currently displayed layers:\n"
@@ -78,6 +78,7 @@ CURRENT MAP STATE:
 {bounds_info}
 {center_info}
 {layer_info}
+{basemap_info}
 
 CONVERSATION CONTEXT:
 {chat_history}
@@ -123,12 +124,9 @@ AVAILABLE ACTIONS:
   "type": "set_bounds",
   "parameters": {{
     "bounds": {{
-      "north": 22.0,
-      "south": 21.0,
-      "east": -157.0,
-      "west": -158.0
+      "southwest": [22.0, -157.0],
+      "northeast": [21.0, -158.0]
     }},
-    "zoom_level": 10,
     "reason": "Why focusing on this area"
   }}
 }}
@@ -141,14 +139,33 @@ AVAILABLE ACTIONS:
   }}
 }}
 
+5. SET_ZOOM_LEVEL - Set zoom level
+{{
+  "type": "set_zoom_level",
+  "parameters": {{
+    "zoom_level": 10,
+    "reason": "Why setting this zoom level"
+  }}
+}}
+
+6. CHANGE_BASEMAP - Change basemap
+{{
+  "type": "change_basemap",
+  "parameters": {{
+    "basemap_id": "basemap_id",
+    "reason": "Why changing the basemap"
+  }}
+}}
 
 INCREMENTAL FLOODING LAYERS (use specific foot levels):
 ${map_state.available_layers}
 
+AVAILABLE BASEMAP IDS:
+{map_state.available_basemaps}
 
 SPECIFIC LOCATIONS:
-- Koolaupoko: {{"north": 21.35, "south": 21.25, "east": -157.7, "west": -157.9}}
-- Waikiki: {{"north": 21.28, "south": 21.26, "east": -157.81, "west": -157.83}}
+- Koolaupoko: {{"southwest": [21.25, -157.9], "northeast": [21.35, -157.7]}}
+- Waikiki: {{"southwest": [21.26, -157.83], "northeast": [21.28, -157.81]}}
 
 ACTION SELECTION GUIDELINES:
 1. For temperature queries: Use temperature_annual or temperature_seasonal
@@ -170,7 +187,7 @@ FLOODING LAYER SELECTION EXAMPLES:
 - "compare flood levels" → add multiple specific layers like "flooding_passive_gwi_02ft" and "flooding_passive_gwi_06ft"
 
 COORDINATE VALIDATION:
-- Hawaii bounds: North: 22.5, South: 18.5, East: -154.0, West: -161.0
+- Hawaii bounds: Southwest: [22.5, -154.0], Northeast: [18.5, -161.0]
 - Ensure all coordinates fall within these bounds
 
 CRITICAL RULES:

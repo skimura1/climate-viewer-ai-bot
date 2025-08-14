@@ -4,10 +4,8 @@ from pydantic import BaseModel
 
 
 class MapBounds(BaseModel):
-    north: float
-    south: float
-    east: float
-    west: float
+    southwest: list[float]
+    northeast: list[float]
 
 class MapCenter(BaseModel):
     lat: float
@@ -19,6 +17,8 @@ class MapState(BaseModel):
     foot_increment: str
     map_position: MapBounds
     zoom_level: int
+    basemap_name: str
+    available_basemaps: list[str]
 
 
 class Message(BaseModel):
