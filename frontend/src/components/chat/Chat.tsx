@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import type { ActiveLayersState } from '@/config/types'
+import type { ActiveLayersState, MapBounds, BasemapConfig } from '@/config/types'
 import { GWI_LAYERS } from '@/config/wmslayers'
+import { BASEMAP_CONFIGS } from '@/config/basemaps'
 
 interface Message {
   id: string
@@ -18,13 +19,10 @@ interface MapState {
   active_layers: string[]
   available_layers: string[]
   foot_increment: string
-  map_position: {
-    north: number
-    south: number
-    east: number
-    west: number
-  }
+  map_position: MapBounds
   zoom_level: number
+  basemap_name: string
+  available_basemaps: string[]
 }
 
 interface MapAction {
@@ -34,10 +32,16 @@ interface MapAction {
 
 interface ChatProps {
   activeLayers: ActiveLayersState
-  onLayerToggle: (layerId: string, isActive: boolean) => void
+  toggleLayer: (layerId: string, isActive: boolean) => void
+  mapPosition: MapBounds
+  zoomLevel: number
+  setMapPosition: (position: MapBounds) => void
+  setZoomLevel: (zoomLevel: number) => void
+  setSelectedBasemap: (basemap: BasemapConfig) => void
+  selectedBasemap: BasemapConfig
 }
 
-const Chat = ({ activeLayers, onLayerToggle }: ChatProps) => {
+const Chat = ({ activeLayers, toggleLayer, mapPosition, zoomLevel, setMapPosition, setZoomLevel, setSelectedBasemap, selectedBasemap }: ChatProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -64,15 +68,31 @@ const Chat = ({ activeLayers, onLayerToggle }: ChatProps) => {
   }
 
   const handleMapActions = (mapActions: MapAction[]) => {
+    // TODO: handle zoom level, map position, change level increment from the backend
     mapActions.forEach((action) => {
-      const { layer_name } = action.parameters;
+      const { layer_name, bounds, zoom_level, basemap_id, reason } = action.parameters;
       
       switch (action.type) {
         case 'add_layer':
-          onLayerToggle(layer_name, true);
+          toggleLayer(layer_name, true);
           break;
         case 'remove_layer':
-          onLayerToggle(layer_name, false);
+          toggleLayer(layer_name, false);
+          break;
+        case 'set_bounds':
+          setMapPosition(bounds)
+          break;
+        case 'set_zoom_level':
+          setZoomLevel(zoom_level)
+          break;
+        case 'clear_layers':
+          Object.keys(activeLayers).forEach(layer => toggleLayer(layer, false))
+          break;
+        case 'change_basemap':
+          const basemap = BASEMAP_CONFIGS.find(basemap => basemap.id === basemap_id)
+          if (basemap) {
+            setSelectedBasemap(basemap)
+          }
           break;
       }
     })
@@ -89,18 +109,16 @@ const Chat = ({ activeLayers, onLayerToggle }: ChatProps) => {
     }
     
     setInputMessage('')
+    console.log(mapPosition)
 
     const mapState: MapState = {
       active_layers: Object.keys(activeLayers).filter(layer => activeLayers[layer]),
       available_layers: GWI_LAYERS.map(layer => layer.layers),
       foot_increment: '100',
-      map_position: {
-        north: 0,
-        south: 0,
-        east: 0,
-        west: 0,
-      },
-      zoom_level: 10,
+      map_position: mapPosition,
+      zoom_level: zoomLevel,
+      basemap_name: selectedBasemap.id,
+      available_basemaps: BASEMAP_CONFIGS.map(basemap => basemap.id)
       }
 
     setMessages(prev => [...prev, userMessage])

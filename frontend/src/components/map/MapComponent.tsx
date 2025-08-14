@@ -3,23 +3,26 @@ import { useEffect, useRef } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { MAP_CONFIG } from '@/config'
 import { GWI_LAYERS } from '@/config/wmslayers'
-import type { BasemapConfig, ActiveLayersState } from '@/config/types'
+import type { BasemapConfig, ActiveLayersState, MapBounds } from '@/config/types'
 
 interface MapComponentProps {
   selectedBasemap: BasemapConfig
   activeLayers: ActiveLayersState
+  mapPosition: MapBounds
+  zoomLevel: number
 }
 
-const MapComponent = ({ selectedBasemap, activeLayers }: MapComponentProps) => {
+const MapComponent = ({ selectedBasemap, activeLayers, mapPosition, zoomLevel }: MapComponentProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const basemapLayerRef = useRef<L.TileLayer | null>(null)
   const dataLayersRef = useRef<Map<string, L.TileLayer>>(new Map())
+  const isUserInteractionRef = useRef(false)
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
 
-    // Initialize Map
+    // Initialize Map,
     const map = L.map(mapRef.current, {
       preferCanvas: MAP_CONFIG.settings.preferCanvas,
       minZoom: MAP_CONFIG.settings.minZoom,
@@ -30,6 +33,29 @@ const MapComponent = ({ selectedBasemap, activeLayers }: MapComponentProps) => {
     )
 
     map.setMaxBounds(MAP_CONFIG.bounds)
+
+    // Track user interactions
+    map.on('movestart', () => {
+      isUserInteractionRef.current = true
+    })
+
+    map.on('moveend', () => {
+      // Reset after a short delay to allow for programmatic changes
+      setTimeout(() => {
+        isUserInteractionRef.current = false
+      }, 100)
+    })
+
+    map.on('zoomstart', () => {
+      isUserInteractionRef.current = true
+    })
+
+    map.on('zoomend', () => {
+      // Reset after a short delay to allow for programmatic changes
+      setTimeout(() => {
+        isUserInteractionRef.current = false
+      }, 100)
+    })
 
     // Add initial basemap
     const basemapUrl = MAP_CONFIG.mapbox.url
@@ -117,6 +143,33 @@ const MapComponent = ({ selectedBasemap, activeLayers }: MapComponentProps) => {
       }
     })
   }, [activeLayers])
+
+  // Handle programmatic map position changes (from chatbot)
+  useEffect(() => {
+    if (!mapInstanceRef.current || isUserInteractionRef.current) return
+    
+    const map = mapInstanceRef.current
+    
+    // Use bounds for better area coverage
+    if (mapPosition.southwest && mapPosition.northeast) {
+      const bounds: [[number, number], [number, number]] = [
+        mapPosition.southwest,  // Southwest [lat, lng]
+        mapPosition.northeast   // Northeast [lat, lng]
+      ]
+      map.fitBounds(bounds, { 
+        animate: true,
+        padding: [20, 20] // Add padding around the bounds
+      })
+    }
+  }, [mapPosition])
+
+  // Handle programmatic zoom changes (from chatbot)
+  useEffect(() => {
+    if (!mapInstanceRef.current || isUserInteractionRef.current) return
+    
+    const map = mapInstanceRef.current
+    map.setZoom(zoomLevel, { animate: true })
+  }, [zoomLevel])
 
   return <div ref={mapRef} className="h-full w-full" />
 }
