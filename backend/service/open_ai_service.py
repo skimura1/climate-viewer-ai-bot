@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from openai import OpenAI
-from openai.types.responses.response import Response
+from openai.types.chat.chat_completion import ChatCompletion
 
 T = TypeVar("T")
 
@@ -21,7 +21,7 @@ class OpenAIService(AIService):
     def __init__(self):
         self.client = OpenAI()
 
-    def get_response(self, prompt: str):
+    def get_response(self, prompt: str) -> ChatCompletion:
         response = self.client.chat.completions.create(
             model="gpt-4",
             messages=[
