@@ -46,8 +46,8 @@ class ClimateAgent:
 
         #TODO:Something is broken here
         prompt = self._build_comprehensive_prompt(query, context, map_state)
-        print(prompt)
         ai_response = self.openai_service.get_response(prompt=prompt)
+
         return self._format_response(ai_response.choices[0].message.content)
 
     def _build_comprehensive_prompt(
@@ -143,17 +143,7 @@ AVAILABLE ACTIONS:
 
 
 INCREMENTAL FLOODING LAYERS (use specific foot levels):
-- flooding_passive_gwi_00ft: Groundwater inundation at 0 feet
-- flooding_passive_gwi_01ft: Groundwater inundation at 1 foot
-- flooding_passive_gwi_02ft: Groundwater inundation at 2 feet
-- flooding_passive_gwi_03ft: Groundwater inundation at 3 feet
-- flooding_passive_gwi_04ft: Groundwater inundation at 4 feet
-- flooding_passive_gwi_05ft: Groundwater inundation at 5 feet
-- flooding_passive_gwi_06ft: Groundwater inundation at 6 feet
-- flooding_passive_gwi_07ft: Groundwater inundation at 7 feet
-- flooding_passive_gwi_08ft: Groundwater inundation at 8 feet
-- flooding_passive_gwi_09ft: Groundwater inundation at 9 feet
-- flooding_passive_gwi_10ft: Groundwater inundation at 10 feet
+${map_state.available_layers}
 
 
 SPECIFIC LOCATIONS:

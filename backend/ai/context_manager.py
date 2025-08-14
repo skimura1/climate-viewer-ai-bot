@@ -58,7 +58,7 @@ class ContextManager:
 
     async def update_context(self, session_id: str, query: str, response: str):
         timestamp = str(datetime.datetime.now())
-        bot_message = Message(role="BOT", content=response, timestamp=timestamp)
-        user_message = Message(role="USER", content=query, timestamp=timestamp)
+        bot_message = Message(id="0", role="BOT", content=response, timestamp=timestamp)
+        user_message = Message(id="1", role="USER", content=query, timestamp=timestamp)
         await self.store.add_message(session_id=session_id, message=bot_message)
         await self.store.add_message(session_id=session_id, message=user_message)

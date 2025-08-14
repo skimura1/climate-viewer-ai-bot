@@ -14,7 +14,8 @@ open_ai_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-origins = ["http://localhost:8000", "https://localhost:8000", "http://localhost:3000", "https://localhost:3000"]
+origins = ["http://localhost:3000", "https://localhost:3000",
+"http://localhost:5173", "https://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +34,7 @@ async def root():
 @app.post("/chat", status_code=201)
 async def chat(chat_request: ChatRequest):
     try:
+        print(chat_request)
         query = chat_request.query
         map_state = chat_request.map_state
 

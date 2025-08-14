@@ -15,12 +15,14 @@ class MapCenter(BaseModel):
 
 class MapState(BaseModel):
     active_layers: list[str] | None
+    available_layers: list[str] | None
     foot_increment: str
     map_position: MapBounds
     zoom_level: int
 
 
 class Message(BaseModel):
+    id: str
     role: str
     content: str
     timestamp: str
