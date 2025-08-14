@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
@@ -38,7 +37,7 @@ interface ChatProps {
   onLayerToggle: (layerId: string, isActive: boolean) => void
 }
 
-const Chat = ({ onLayerToggle }: ChatProps) => {
+const Chat = ({ activeLayers, onLayerToggle }: ChatProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -49,10 +48,24 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
+  
+  // Add refs for scrolling
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const handleMapActions = (mapActions: MapAction[]) => {
     mapActions.forEach((action) => {
-      const { display_name, layer_name, reason } = action.parameters;
+      const { layer_name } = action.parameters;
       
       switch (action.type) {
         case 'add_layer':
@@ -78,7 +91,7 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
     setInputMessage('')
 
     const mapState: MapState = {
-      active_layers: [],
+      active_layers: Object.keys(activeLayers).filter(layer => activeLayers[layer]),
       available_layers: GWI_LAYERS.map(layer => layer.layers),
       foot_increment: '100',
       map_position: {
@@ -132,10 +145,9 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
           Chat
         </Button>
       ) : (
-        <Card className="w-96 h-[600px] shadow-lg">
-          <CardHeader className="border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Climate Assistant</CardTitle>
+        <div className="flex flex-col h-[400px] p-0 bg-white rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-4">
+              Climate Assistant
               <Button
                 variant="ghost"
                 size="icon"
@@ -144,9 +156,10 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-          </CardHeader>
-          <CardContent className="flex flex-col h-full p-0">
-            <ScrollArea className="flex-1 p-4">
+            {/* Divider */}
+            <div className="border-t"></div>
+            {/* Chat messages */}
+            <ScrollArea className="flex-1 px-4 min-h-0">
               <div className="space-y-4">
                 {messages.map((message) => (
                   <div
@@ -159,7 +172,7 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
                     <div
                       className={cn(
                         'max-w-[80%] rounded-lg px-3 py-2 text-sm',
-                        message.role=== 'user'
+                        message.role === 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground'
                       )}
@@ -168,8 +181,12 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
+            {/* Divider */}
+            <div className="border-t"></div>
+            {/* Input */}
             <div className="border-t p-4">
               <div className="flex gap-2">
                 <Input
@@ -184,8 +201,7 @@ const Chat = ({ onLayerToggle }: ChatProps) => {
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+        </div>
       )}
     </div>
   )
