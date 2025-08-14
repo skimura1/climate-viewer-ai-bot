@@ -2,7 +2,7 @@ import json
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
@@ -25,6 +25,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_climate_agent():
+    return ClimateAgent()
+
 
 @app.get("/")
 async def root():
@@ -32,13 +35,11 @@ async def root():
 
 
 @app.post("/chat", status_code=201)
-async def chat(chat_request: ChatRequest):
+async def chat(chat_request: ChatRequest, climate_agent: ClimateAgent = Depends(get_climate_agent)):
     try:
-        print(chat_request)
         query = chat_request.query
         map_state = chat_request.map_state
 
-        climate_agent = ClimateAgent()
 
         response = await climate_agent.process_query(query=query,
                                                map_state=map_state,
