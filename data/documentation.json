@@ -1,9 +1,34 @@
 {
-    "passive_flooding": {
-        "title": "Passive Marine and Low-lying Flooding",
-        "description": "Passive flooding was modeled by the Climate Resilience Collaborative at the University of Hawaiʻi at Mānoa School of Ocean and Earth Science and Technology. Using a modified “bathtub” approach following methods described in Anderson et al. 2018, passive flooding describes using color to indicate potential water depth, those portions of a digital elevation model (DEM) equal to or less than the sea level scenario at MHHW tidal datum. The passive flooding model provides an initial assessment of low-lying areas susceptible to flooding by sea level rise. Passive flooding includes areas that are hydrologically connected to the ocean (marine flooding) and areas that are not directly hydrologically connected to the ocean (low lying)*. Data used in modeling passive flooding include the DEM at 2 meter resolution and the MHHW datum from local tide gauges. DEMs used in this study are modified from freely available sources like the NOAA, U.S. Army Corps of Engineers (USACE) and U.S. Geological Survey (USGS). DEMs are derived from aerial based light detection and ranging (LiDAR) data. Edits are made to correct streams and canals that were mischaracterized in the original data. The horizontal and vertical positional accuracies of the DEMs conform to flood hazard mapping standards of the Federal Emergency Management Agency (FEMA 2012). Passive flooding is modeled at 0 – 10 ft sea level rise scenarios. Please refer to SLR scenario documentation to apply an appropriate timeline. Passive flooding was modeled using the DEMs in geographic information systems software to identify areas below a certain sea level height (flooded by sea level rise) when raising water levels above a tidal datum surface. In other words, water levels are shown as they would appear during MHHW, or the average higher high water height of each tidal day. The area flooded was derived by subtracting a tidal surface model from the DEM. Assumptions and Limitations: In many areas around the State, representing sea level rise from passive marine flooding will likely produce an underestimate of the area inundated or permanently submerged because the model does not account for waves and coastal erosion, important processes along Hawaiʻi’s highly dynamic coasts. For this reason, coastal erosion and annual high wave flooding are also modeled to provide a more comprehensive picture of the extent of hazard exposure with sea level rise. Note that the passive flooding model does not explicitly include flooding through storm drain systems and other underground infrastructure, which would contribute to flooding in many low-lying areas identified in the model (see drainage backflow and storm drain structure failure layers and descriptions). The DEMs used in the modeling depict a smoothed topographic surface and do not identify basements, parking garages, and other development or infrastructure below ground that would be affected by marine and groundwater flooding associated with sea level rise. Detailed hydrologic and engineering modeling may be necessary to fully assess passive marine flooding hazards at the scale of individual properties. Mapping errors may be found in some areas due to clipping (subsetting) of the original map layers using a shoreline (Special Management Area) boundary. *Low lying areas may be indirectly connected to the ocean through soils and sediments.",
-        "base_layer_name": "CRC:HI_State_80prob_{scenario}ft_GWI",
+    "passive_marine_flooding": {
+        "title": "Passive Marine Flooding",
+        "description": "Passive marine flooding identifies areas hydrologically connected to the ocean that would be inundated by sea level rise scenarios. Using a modified bathtub approach with DEMs and MHHW tidal datum, the model identifies coastal areas below specified sea level heights that have direct surface connections to marine waters. Water levels are shown as they would appear during Mean Higher High Water (MHHW), representing the average higher high water height of each tidal day. These areas experience direct marine inundation as sea levels rise, with floodwater arriving via surface flow paths from the ocean. The modeling uses 2-meter resolution DEMs derived from LiDAR data, with horizontal and vertical accuracies conforming to FEMA flood mapping standards. Limitations include not accounting for wave action, coastal erosion, or dynamic coastal processes that are important along Hawaii's active coastlines.",
+        "base_layer_name": "CRC:HI_State_80prob_{scenario}ft_SCI",
         "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "scenario_layers": {
+            "0": "CRC:HI_State_80prob_00ft_SCI",
+            "1": "CRC:HI_State_80prob_01ft_SCI",
+            "2": "CRC:HI_State_80prob_02ft_SCI",
+            "3": "CRC:HI_State_80prob_03ft_SCI",
+            "4": "CRC:HI_State_80prob_04ft_SCI",
+            "5": "CRC:HI_State_80prob_05ft_SCI",
+            "6": "CRC:HI_State_80prob_06ft_SCI",
+            "7": "CRC:HI_State_80prob_07ft_SCI",
+            "8": "CRC:HI_State_80prob_08ft_SCI",
+            "9": "CRC:HI_State_80prob_09ft_SCI",
+            "10": "CRC:HI_State_80prob_10ft_SCI"
+        },
+        "terms": [
+            "passive marine flooding", "marine flooding", "ocean connected flooding",
+            "direct marine inundation", "hydrologically connected flooding",
+            "coastal flooding", "marine inundation", "ocean flooding",
+            "show marine flooding", "display ocean flooding", "marine flood zones"
+        ]
+    },
+    "low_lying_flooding": {
+    "title": "Low-lying Area Flooding",
+    "description": "Low-lying area flooding identifies areas that are topographically below sea level rise scenarios but lack direct hydrological connections to the ocean. These areas may become flooded through indirect pathways such as subsurface connections through soils and sediments, storm drain systems, or other underground infrastructure not explicitly modeled in the passive flooding approach. The bathtub method identifies these isolated low-lying areas by comparing DEM elevations to MHHW tidal datum plus sea level rise scenarios. While not directly connected to marine waters at the surface, these areas represent potential flood zones that could fill through various indirect mechanisms as groundwater tables rise or drainage systems fail. The model does not account for the specific timing or pathways of how water would reach these areas, representing them as potential flood-prone zones requiring more detailed hydrologic analysis to determine actual flood risk.",
+    "base_layer_name": "CRC:HI_State_80prob_{scenario}ft_GWI",
+    "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "scenario_layers": {
             "0": "CRC:HI_State_80prob_00ft_GWI",
             "1": "CRC:HI_State_80prob_01ft_GWI",
@@ -17,37 +42,32 @@
             "9": "CRC:HI_State_80prob_09ft_GWI",
             "10": "CRC:HI_State_80prob_10ft_GWI"
         },
-        "passive_flooding_terms": [
-            "passive flooding", "passive marine flooding", "sea level rise flooding", 
-            "marine flooding", "tidal flooding", "MHHW flooding",
-            "flooded areas", "inundated areas", "permanently submerged", "low-lying areas",
-            "areas below sea level", "flooded zones", "flood mapping",
-            "show flooding", "display flooded areas", "flooding scenarios", 
-            "sea level rise impact", "what areas flood",
-            "Hawaii flooding", "Hawaiian coastal flooding", "island flooding", 
-            "coastal inundation",
-            "bathtub model", "DEM flooding", "mean higher high water flooding"
+        "terms": [
+            "low-lying flooding", "low lying areas", "indirect marine flooding",
+            "isolated flood zones", "areas not connected to ocean",
+            "low elevation flooding", "topographic flooding", "basin flooding",
+            "show low-lying areas", "display isolated flood zones"
         ]
     },
     "groundwater_inundation": {
         "title": "Groundwater Inundation",
         "description": "Groundwater Inundation (GWI) refers to flooding that occurs as groundwater is lifted above the elevation of the ground surface and/or buried infrastructure. GWI is one of the more difficult flood mechanisms to manage owing to its ability to evade coastal defenses designed to mitigate direct marine flooding (e.g., seawalls, revetments, and other methods of shoreline hardening). Simulations of groundwater levels within the Koʻolaupoko Moku makai of the 10m elevation contour were produced using a 3D numerical model (MODFLOW). The methodology for model construction was based on Habel et al. (2017) and was further expanded in accordance with Habel et al. (2020) and by incorporating aquifer drain modeling in alignment with Whittier et al. (2009). Calibration included comparing the model’s outputs with 86 discrete water-level observations from the Hawai’i Department of Health Leaky Underground Storage Tank records, five discrete water level observations from Ghazal et al. (2023), and five sets of continuous monitoring data obtained as part of ongoing monitoring efforts in the Ko‘olaupoko Moku region. Following calibration, the simulated mean residual water level and root-mean-squared error were 0.09 m and 0.30 m, respectively. Steady-state groundwater levels were simulated, considering one foot increments of sea level rise up to 10 ft. Areas vulnerable to GWI were identified through a comparison of simulated water table elevations to a DEM. Flood depths were calculated where the simulated water table exceeds ground surface, and depths to groundwater where the opposite occurred. The total vertical error in GWI simulation, considering LiDAR and calibrated MODFLOW errors, was measured at 0.42 meters.",
-        "base_layer_name": "CRC:HI_State_80prob_{scenario}ft_GWI",
+        "base_layer_name": "CRC:HI_Oahu_GWI_{scenario}ft",
         "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "scenario_layers": {
-            "0": "CRC:HI_State_80prob_00ft_GWI",
-            "1": "CRC:HI_State_80prob_01ft_GWI",
-            "2": "CRC:HI_State_80prob_02ft_GWI",
-            "3": "CRC:HI_State_80prob_03ft_GWI",
-            "4": "CRC:HI_State_80prob_04ft_GWI",
-            "5": "CRC:HI_State_80prob_05ft_GWI",
-            "6": "CRC:HI_State_80prob_06ft_GWI",
-            "7": "CRC:HI_State_80prob_07ft_GWI",
-            "8": "CRC:HI_State_80prob_08ft_GWI",
-            "9": "CRC:HI_State_80prob_09ft_GWI",
-            "10": "CRC:HI_State_80prob_10ft_GWI"
+            "0": "CRC:HI_Oahu_GWI_00ft",
+            "1": "CRC:HI_Oahu_GWI_01ft",
+            "2": "CRC:HI_Oahu_GWI_02ft",
+            "3": "CRC:HI_Oahu_GWI_03ft",
+            "4": "CRC:HI_Oahu_GWI_04ft",
+            "5": "CRC:HI_Oahu_GWI_05ft",
+            "6": "CRC:HI_Oahu_GWI_06ft",
+            "7": "CRC:HI_Oahu_GWI_07ft",
+            "8": "CRC:HI_Oahu_GWI_08ft",
+            "9": "CRC:HI_Oahu_GWI_09ft",
+            "10": "CRC:HI_Oahu_GWI_10ft"
         },
-        "groundwater_inundation_terms": [
+        "terms": [
             "groundwater inundation", "groundwater flooding", "GWI", 
             "subsurface flooding", "underground flooding", "water table flooding",
             "groundwater rise", "elevated groundwater", "groundwater above surface",
@@ -71,19 +91,19 @@
         "base_layer_name": "CRC:HI_Oahu_EM_{scenario}",
         "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "scenario_layers": {
-            "0": "HI_Oahu_EM_00ft",
-            "1": "HI_Oahu_EM_01ft",
-            "2": "HI_Oahu_EM_02ft",
-            "3": "HI_Oahu_EM_03ft",
-            "4": "HI_Oahu_EM_04ft",
-            "5": "HI_Oahu_EM_05ft",
-            "6": "HI_Oahu_EM_06ft",
-            "7": "HI_Oahu_EM_07ft",
-            "8": "HI_Oahu_EM_08ft",
-            "9": "HI_Oahu_EM_09ft",
-            "10": "HI_Oahu_EM_10ft"
+            "0": "CRC:HI_Oahu_EM_00ft",
+            "1": "CRC:HI_Oahu_EM_01ft",
+            "2": "CRC:HI_Oahu_EM_02ft",
+            "3": "CRC:HI_Oahu_EM_03ft",
+            "4": "CRC:HI_Oahu_EM_04ft",
+            "5": "CRC:HI_Oahu_EM_05ft",
+            "6": "CRC:HI_Oahu_EM_06ft",
+            "7": "CRC:HI_Oahu_EM_07ft",
+            "8": "CRC:HI_Oahu_EM_08ft",
+            "9": "CRC:HI_Oahu_EM_09ft",
+            "10": "CRC:HI_Oahu_EM_10ft"
         },
-        "emergent_shallow_groundwater_terms": [
+        "terms": [
             "shallow groundwater", "emergent groundwater", "high water table",
             "near-surface groundwater", "shallow water table",
             "soggy areas", "wet areas", "marshy areas", "swampy ground",
@@ -111,7 +131,7 @@
             "9": "CRC:HI_Oahu_80prob_09ft_SLR_strmDr_v02",
             "10": "CRC:HI_Oahu_80prob_10ft_SLR_strmDr_v02"
         },
-        "drainage_backflow_terms": [
+        "terms": [
                 "drainage backflow", "storm drain backflow", "drainage system failure",
                 "storm drain flooding", "urban drainage flooding", "coastal drainage failure",
                 "gravity-flow drainage reversal", "drainage system reversal", 
@@ -134,7 +154,7 @@
     },
     "annual_high_wave_flooding": {
         "title": "Annual High Wave Flooding",
-        "description": "Annual high wave flooding refers to the flooding that occurs when the water level is at or above the ground surface. This can occur when the water table rises above the ground surface, causing water to flow into the building through the drains. Annual high wave flooding can cause significant damage to buildings and other structures, and can also lead to the spread of disease and other health hazards. The annual high wave flooding model provides an initial assessment of the risk of annual high wave flooding in a given area. The model is based on the assumption that the water table will rise in response to sea level rise, and that the water table will rise to the same elevation as the ground surface in the area. The model is also based on the assumption that the water table will rise at a rate of 1 foot per year. The model is used to identify areas that are at risk of annual high wave flooding, and to provide information on the potential severity of the risk.",
+        "description": "Hawaiʻi is exposed to large waves annually on all open coasts due to our location in the Central North Pacific Ocean. The distance over which waves run-up and wash across the shoreline will increase with sea level rise. As water levels increase, less wave energy will be dissipated through breaking on nearshore reefs and waves will arrive at a higher elevation at the shoreline. We use the phase-resolving numerical model Boussinesq Ocean and Surf Zone (BOSZ) to simulate wave-driven flooding for annually-recurring wave conditions under a range of SLR levels. Modeling the annually-recurring wave conditions is relevant to this modeling effort since it represents wave conditions that, on average, could occur in any given year. The simulations are done over a high resolution (5 m x 5 m horizontal grid spacing) digital surface model, and the final product is projected onto a 2 m x 2 m grid. Histograms of wave directions generated by lengthy hindcast records (40-yr-long) are used to determine the dominant wave directions that need to be modeled. Our directional bands are 30-degrees wide (+/- 15 deg). If for a given domain we clearly identify multiple wave directions from which the wave amplitudes are sufficiently high, we will run our model simulations separately for each of these wave directions. The annually-recurring wave height is determined from a Generalized Extreme Value (GEV) analysis. All simulations use the MHHW tidal datum. We directly calculate the MHHW from a lengthy (18.6-yr-long) record of water level at the nearest tide gauge. Sea level rise scenarios (0-10ft) are added as a water state assuming the same tidal epoch and wave direction and amplitudes. Each SLR value requires a separate model simulation.The flood depth at a given grid cell is the mean of the five highest water depth values out of the entire simulation.",
         "base_layer_name": "CRC:HI_Oahu_2D_Depth_{scenario}ft",
         "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "scenario_layers": {
@@ -150,7 +170,7 @@
             "9": "CRC:HI_Oahu_2D_Depth_09ft",
             "10": "CRC:HI_Oahu_2D_Depth_10ft"
         },
-        "wave_driven_flooding_terms": [
+        "terms": [
             "wave-driven flooding", "wave flooding", "coastal wave flooding",
             "wave inundation", "surf zone flooding", "wave runup flooding",
             "annual wave flooding",
@@ -176,12 +196,80 @@
     },
     "compound_flooding": {
         "title": "Compound Flooding",
-        "description": "Storm drain structure failure refers to the failure of a storm drain structure, such as a manhole or catch basin, to function properly. This can occur when the water table rises above the ground surface, causing water to flow into the storm drain structure. Storm drain structure failure can cause significant damage to buildings and other structures, and can also lead to the spread of disease and other health hazards. The storm drain structure failure model provides an initial assessment of the risk of storm drain structure failure in a given area. The model is based on the assumption that the water table will rise in response to sea level rise, and that the water table will rise to the same elevation as the ground surface in the area. The model is also based on the assumption that the water table will rise at a rate of 1 foot per year. The model is used to identify areas that are at risk of storm drain structure failure, and to provide information on the potential severity of the risk.",
+        "description": "Heavy rainfall events in Hawai’i produce widespread flooding, power outages, road closures and property damage. In the coastal zone, these impacts are exacerbated by climate change due to the compound effects of sea level rise and the likelihood of more intense storms reaching the islands. The team simulates the inundation associated with future flood events to help inform climate-related policy and mitigation strategies. The team is implementing an expanded version of the Weather Research and Forecasting Hydrological (WRF-Hydro) modeling system, developed for coastal-urban flood applications (WRF-Hydro-CUFA), for event specific domains in Hawai'i. The dynamical model will be validated with historical heavy rainfall events such as Kona lows, upper tropospheric troughs, tropical cyclones, and cold fronts. Combining modeled precipitation events with scenarios of sea level rise allows the team to simulate future flooding and to identify areas at risk of compound flooding. This is exciting and challenging work given Hawai‘i’s complex terrain, limited domain size, and lack of available observations. Despite this multifaceted challenge, the team is making progress in creating high resolution hydrological modeling systems for the region.",
+        "base_layer_name": "CRC:HI_compound_prelim_{scenario}ft",
+        "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "scenario_layers": {
+            "0": "CRC:HI_compound_prelim_00ft",
+            "1": "CRC:HI_compound_prelim_01ft",
+            "2": "CRC:HI_compound_prelim_02ft",
+            "3": "CRC:HI_compound_prelim_03ft",
+            "4": "CRC:HI_compound_prelim_04ft",
+            "5": "CRC:HI_compound_prelim_05ft",
+            "6": "CRC:HI_compound_prelim_06ft",
+            "7": "CRC:HI_compound_prelim_07ft",
+            "8": "CRC:HI_compound_prelim_08ft",
+            "9": "CRC:HI_compound_prelim_09ft",
+            "10": "CRC:HI_compound_prelim_10ft"
+        },
+        "terms": [
+            "compound flooding", "combined flooding", "storm and sea level rise flooding",
+            "rainfall and tidal flooding", "multi-source flooding",
+            "heavy rainfall flooding", "storm flooding", "rain event flooding",
+            "precipitation flooding", "weather event flooding",
+            "Kona low flooding", "tropical cyclone flooding", "cold front flooding",
+            "upper tropospheric trough flooding", "storm system flooding",
+            "future storm flooding", "intensified storm impacts", "enhanced coastal flooding",
+            "power outage flooding", "road closure flooding", "property damage flooding",
+            "widespread flooding", "infrastructure impact flooding",
+            "coastal zone flooding", "coastal-urban flooding", "shoreline storm flooding",
+            "coastal storm impacts",
+            "future flood events", "future compound flooding", "climate scenario flooding",
+            "projected storm flooding", "future storm scenarios",
+            "show storm flooding", "heavy rain and high tide flooding",
+            "what happens when storms hit during high tide", "worst case flooding scenarios",
+            "climate change flooding impacts", "policy flooding information"
+        ],
         "citation": "Son, Y., Di Lorenzo, E., & Luo, J. 2023. WRF-Hydro-CUFA: A Scalable and Adaptable Coastal-Urban Flood Model Based on the WRF-Hydro and SWMM Models. Environ. Model. & Software 167, 105770-. https://doi.org/10.1016/j.envsoft.2023.105770"
-
     },
     "future_erosion_hazard_zone": {
         "title": "Future Erosion Hazard Zone",
-        "description": "The Future Erosion Hazard Zone (FEHZ) is a zone that is at risk of erosion due to sea level rise. The FEHZ is based on the assumption that the water table will rise in response to sea level rise, and that the water table will rise to the same elevation as the ground surface in the area. The FEHZ is used to identify areas that are at risk of erosion, and to provide information on the potential severity of the risk."
+        "description": "The Future Erosion Hazard Zone (FEHZ) is a zone that is at risk of erosion due to sea level rise. The FEHZ is based on the assumption that the water table will rise in response to sea level rise, and that the water table will rise to the same elevation as the ground surface in the area. The FEHZ is used to identify areas that are at risk of erosion, and to provide information on the potential severity of the risk.",
+        "base_layer_name": "CRC:HI_Oahu_WholeIsland_fsp_{scenario}ft",
+        "available_scenarios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "scenario_layers": {
+            "0": "CRC:HI_Oahu_WholeIsland_fsp_00ft",
+            "1": "CRC:HI_Oahu_WholeIsland_fsp_01ft",
+            "2": "CRC:HI_Oahu_WholeIsland_fsp_02ft",
+            "3": "CRC:HI_Oahu_WholeIsland_fsp_03ft",
+            "4": "CRC:HI_Oahu_WholeIsland_fsp_04ft",
+            "5": "CRC:HI_Oahu_WholeIsland_fsp_05ft",
+            "6": "CRC:HI_Oahu_WholeIsland_fsp_06ft",
+            "7": "CRC:HI_Oahu_WholeIsland_fsp_07ft",
+            "8": "CRC:HI_Oahu_WholeIsland_fsp_08ft",
+            "9": "CRC:HI_Oahu_WholeIsland_fsp_09ft",
+            "10": "CRC:HI_Oahu_WholeIsland_fsp_10ft"
+        },
+        "terms": [
+                "future erosion hazard zone", "FEHZ", "erosion hazard zone",
+                "coastal erosion zone", "erosion risk area", "future erosion zone",
+                "sea level rise erosion", "coastal erosion", "shoreline erosion",
+                "beach erosion", "future erosion", "erosion due to sea level rise",
+                "water table erosion", "groundwater erosion impacts", "rising water table erosion",
+                "subsurface erosion", "water table rise erosion",
+                "erosion risk", "at risk of erosion", "erosion vulnerability",
+                "erosion susceptibility", "areas prone to erosion", "erosion threat zones",
+                "erosion severity", "potential erosion impacts", "erosion damage potential",
+                "severe erosion risk", "high erosion areas",
+                "future erosion impacts", "projected erosion", "future shoreline changes",
+                "long-term erosion", "erosion projections", "future coastal changes",
+                "identify erosion areas", "erosion zone mapping", "erosion hazard identification",
+                "erosion planning areas",
+                "show erosion zones", "where will erosion occur", "future shoreline retreat",
+                "coastal erosion maps", "erosion risk assessment", "beach loss areas",
+                "shoreline change predictions",
+                "coastal hazard zones", "shoreline hazard areas", "beach erosion zones",
+                "oceanfront erosion", "waterfront erosion risk"
+            ]
     }
 }
