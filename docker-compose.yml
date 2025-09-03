@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: climate-viewer-postgres
+    environment:
+      POSTGRES_DB: climate_viewer_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - climate-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@hawaiianclimate.com
+      - PGADMIN_DEFAULT_PASSWORD=admin_password
+      - PGADMIN_LISTEN_PORT=80
+    ports:
+      - "8000:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - climate-network
+
+networks:
+  climate-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:
