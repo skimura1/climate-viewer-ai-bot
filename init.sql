@@ -16,22 +16,18 @@ GRANT ALL PRIVILEGES ON DATABASE climate_viewer_dev TO dev_user;
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- Create table for climate documentation
-CREATE TABLE climate_documentation (
+-- Create table for chunks (used by RAG system)
+CREATE TABLE IF NOT EXISTS public.chunks (
     id SERIAL PRIMARY KEY,
-    layer_id VARCHAR(100) NOT NULL,
-    chunk_type VARCHAR(50) NOT NULL,
-    title TEXT NOT NULL,
+    layer_id VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    content_embedding vector(1536),  -- OpenAI embedding dimension
-    metadata JSONB,
+    embedding vector(1536),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Create indexes for performance
-CREATE INDEX ON climate_documentation 
-USING ivfflat (content_embedding vector_cosine_ops) 
+CREATE INDEX ON chunks 
+USING ivfflat (embedding vector_cosine_ops) 
 WITH (lists = 100);
 
-CREATE INDEX ON climate_documentation (layer_id);
-CREATE INDEX ON climate_documentation (chunk_type);
+CREATE INDEX ON chunks (layer_id);
