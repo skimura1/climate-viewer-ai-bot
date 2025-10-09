@@ -73,3 +73,10 @@ temp/
 
 # TODO List
 todo.md
+
+# PDF Publications
+pdf_pub/
+backend/notebooks/outputs/
+
+.DS_Store
+.ipynb_checkpoints
