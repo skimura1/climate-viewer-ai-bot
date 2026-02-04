@@ -2,40 +2,20 @@ import json
 
 from ai.context_manager import ContextManager
 from models.chat import ChatContext, ChatResponse, MapState
-
-# from service.map_service import MapService
 from service.open_ai_service import OpenAIService
-
-"""Single Climate Agent Handling Climate Queries"""
 
 
 class ClimateAgent:
+    """Single Climate Agent Handling Climate Queries"""
+
     def __init__(self):
         self.openai_service = OpenAIService()
-        # self.geoserver_service = GeoserverService()
         self.context_manager = ContextManager()
-        # self.map_service = MapService()
-        # self.data_catalog = DataCatalog()  # TODO: Implement DataCatalog
 
     async def process_query(self, query: str, map_state: MapState, session_id: str) -> ChatResponse:
         """Main Entry Point - Handle all queries"""
-
-        # # Get Context
-        # context = await self.context_manager.get_context(
-        #     session_id, map_state=self.map_service.get_state()
-        # )
-
-        # Get Context
         context = await self.context_manager.get_context(session_id)
-
-        # Get Response from AI service
         response = await self._generate_response(query=query, context=context, map_state=map_state)
-
-        # Extract actions from prompt and execute the actions
-        # TODO: Figure out what types of actions need to be done
-        # actions = self._parse_actions(response)
-        # result = await self._execute_actions(actions)
-
         await self.context_manager.update_context(session_id, query, response.response)
         return response
 
@@ -43,26 +23,33 @@ class ClimateAgent:
         self, query: str, context: ChatContext, map_state: MapState
     ) -> ChatResponse:
         """Generate response using single comprehensive prompt"""
-
-        #TODO:Something is broken here
         prompt = self._build_comprehensive_prompt(query, context, map_state)
         ai_response = self.openai_service.get_response(prompt=prompt)
-
         return self._format_response(ai_response.choices[0].message.content)
 
     def _build_comprehensive_prompt(
         self, query: str, context: ChatContext, map_state: MapState
     ) -> str:
-        bounds_info = f"""Map Position Bounds: 
-        Southwest: {map_state.map_position.southwest}
-        Northeast: {map_state.map_position.northeast}"""
+        sw = map_state.map_position.southwest
+        ne = map_state.map_position.northeast
+        center_lat = (sw[0] + ne[0]) / 2
+        center_long = (sw[1] + ne[1]) / 2
 
-        center_info = f"Map Center: lat: {map_state.map_position.northeast[0]:.4f}," + \
-            f"long: {map_state.map_position.northeast[1]:.4f}"
+        bounds_info = (
+            f"Map Position Bounds:\n"
+            f"        Southwest: {sw}\n"
+            f"        Northeast: {ne}"
+        )
+
+        center_info = f"Map Center: lat: {center_lat:.4f}, long: {center_long:.4f}"
 
         chat_history = f"Chat History: {context.messages}"
 
-        basemap_info = f"Current Basemap: {map_state.basemap_name}" if map_state.basemap_name else "No basemap currently selected."
+        basemap_info = (
+            f"Current Basemap: {map_state.basemap_name}"
+            if map_state.basemap_name
+            else "No basemap currently selected."
+        )
 
         if map_state.active_layers:
             layer_info = "Currently displayed layers:\n"
@@ -112,7 +99,7 @@ AVAILABLE ACTIONS:
 
 2. REMOVE_LAYER - Remove specific layer
 {{
-  "type": "remove_layer", 
+  "type": "remove_layer",
   "parameters": {{
     "layer_name": "layer_to_remove",
     "reason": "Why removing this layer"
@@ -158,7 +145,7 @@ AVAILABLE ACTIONS:
 }}
 
 INCREMENTAL FLOODING LAYERS (use specific foot levels):
-${map_state.available_layers}
+{map_state.available_layers}
 
 AVAILABLE BASEMAP IDS:
 {map_state.available_basemaps}
@@ -173,7 +160,7 @@ ACTION SELECTION GUIDELINES:
 3. For flooding/sea level rise: Use specific incremental flooding layers (e.g., flooding_passive_gwi_03ft for 3-foot flooding)
 4. For flooding scenarios: Choose appropriate foot level based on user query (0-10ft available)
 5. For flooding comparisons: Add multiple specific flood levels (e.g., flooding_passive_gwi_01ft and flooding_passive_gwi_05ft)
-6. For specific islands: Set bounds to focus on that island  
+6. For specific islands: Set bounds to focus on that island
 7. For comparisons: Add multiple relevant layers with exact names
 8. For temporal analysis: Set appropriate time ranges
 9. Clear existing layers if starting a new analysis topic
@@ -199,13 +186,12 @@ CRITICAL RULES:
 6. Provide clear reasons for each action"""
 
     def _format_response(self, response: str | None) -> ChatResponse:
-        """Parse AI response and return structured ChatResponse with improved error handling"""
+        """Parse AI response and return structured ChatResponse"""
         if response is None:
             return ChatResponse(response="No response received from AI service", map_actions=None)
 
         response = response.strip()
 
-        # Try to extract JSON from response if it contains other text
         json_start = response.find('{')
         json_end = response.rfind('}') + 1
 
@@ -217,14 +203,12 @@ CRITICAL RULES:
         try:
             parsed = json.loads(json_content)
 
-            # Validate required fields
             if not isinstance(parsed, dict):
                 raise ValueError("Response must be a JSON object")
 
             ai_response = parsed.get("response", "")
             map_actions = parsed.get("map_actions", [])
 
-            # Validate map_actions structure
             if map_actions and isinstance(map_actions, list):
                 validated_actions = []
                 for action in map_actions:
@@ -243,9 +227,7 @@ CRITICAL RULES:
 
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {e}")
-            # Try to extract meaningful text from the response
             if response:
-                # Remove common markdown formatting
                 clean_response = response.replace('```json', '').replace('```', '').strip()
                 return ChatResponse(
                     response=clean_response if len(clean_response) > 10 else "I encountered an issue processing your request. Could you please rephrase?",
