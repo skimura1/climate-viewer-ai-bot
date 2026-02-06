@@ -29,10 +29,6 @@ def get_climate_agent():
     return ClimateAgent()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 
 @app.post("/chat", status_code=201)
 async def chat(chat_request: ChatRequest, climate_agent: ClimateAgent = Depends(get_climate_agent)):
