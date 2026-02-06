@@ -12,7 +12,10 @@ from sqlalchemy.orm import sessionmaker
 
 # Import the DocumentChunk model
 import sys
-sys.path.append('..')
+import os
+# Add the backend directory to the path so we can import models
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, backend_dir)
 from models.document_chunk import DocumentChunk
 
 
@@ -279,7 +282,7 @@ class ClimateRAGSystem:
         context = "\n".join(context_parts)
 
         # Build the full prompt
-        prompt = f"""You are a helpful climate assistant for Hawaii. Your job is to make scientific research about sea level rise and coastal flooding easy to understand for everyone—from students to homeowners to policymakers.
+        prompt = f"""You are a helpful climate assistant for Hawaii who is an expert in sea level rise and coastal flooding. Your job is to make scientific research about sea level rise and coastal flooding easy to understand for everyone—from students to homeowners to policymakers. You also will guide users in using the CRC Climate Viewer to answer their questions.
 
 === RETRIEVED SCIENTIFIC LITERATURE ===
 
@@ -360,7 +363,7 @@ Begin your response: """
         top_k: int = 10,
         layers: list[str] | None = None,
         min_confidence: str = "MEDIUM",
-        temperature: float = 0.3,
+        temperature: float = 0.0,
         auto_detect_layers: bool = True,
     ) -> dict[str, Any]:
         """
@@ -371,7 +374,7 @@ Begin your response: """
             top_k: Number of chunks to retrieve
             layers: Optional layer filter (if None and auto_detect_layers=True, will auto-detect)
             min_confidence: Minimum confidence level
-            temperature: GPT temperature setting (lower = more factual)
+            temperature: GPT temperature (0 = deterministic, best for definition/testing)
             auto_detect_layers: If True and layers=None, automatically detect layers from query
 
         Returns:

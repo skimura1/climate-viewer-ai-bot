@@ -6,7 +6,7 @@ This package contains data models used throughout the application:
 - SQLAlchemy models for database entities (document_chunk.py)
 """
 
-from backend.models.chat import (
+from .chat import (
     ChatContext,
     ChatRequest,
     ChatResponse,
@@ -15,7 +15,7 @@ from backend.models.chat import (
     MapState,
     Message,
 )
-from backend.models.document_chunk import Base, DocumentChunk
+from .document_chunk import Base, DocumentChunk
 
 __all__ = [
     # Chat models
