@@ -1,8 +1,9 @@
 import json
-
+from typing import List
 from ai.context_manager import ContextManager
-from models.chat import ChatContext, ChatResponse, MapState
+from models.chat import ChatContext, ChatResponse, MapActions, MapState
 from service.open_ai_service import OpenAIService
+from ai.rag_query_system import ClimateRAGSystem
 
 
 class ClimateAgent:
@@ -11,24 +12,37 @@ class ClimateAgent:
     def __init__(self):
         self.openai_service = OpenAIService()
         self.context_manager = ContextManager()
+        self.rag_system = ClimateRAGSystem()
+
 
     async def process_query(self, query: str, map_state: MapState, session_id: str) -> ChatResponse:
         """Main Entry Point - Handle all queries"""
         context = await self.context_manager.get_context(session_id)
-        response = await self._generate_response(query=query, context=context, map_state=map_state)
-        await self.context_manager.update_context(session_id, query, response.response)
-        return response
+        rag_response = self.rag_system.generate_response(query=query, context=context, map_state=map_state)
+        detected_layers = rag_response.metadata.auto_detected_layers
+        map_actions = self._generate_map_actions(query, context, map_state, detected_layers)
+        await self.context_manager.update_context(session_id, query, rag_response.response)
+        return ChatResponse(response=rag_response.response, map_actions=[action.model_dump() for action in map_actions])
 
-    async def _generate_response(
-        self, query: str, context: ChatContext, map_state: MapState
-    ) -> ChatResponse:
-        """Generate response using single comprehensive prompt"""
-        prompt = self._build_comprehensive_prompt(query, context, map_state)
-        ai_response = self.openai_service.get_response(prompt=prompt)
-        return self._format_response(ai_response.choices[0].message.content)
+    def _generate_map_actions(self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None) -> List[MapActions]:
+        """Generate map actions based on detected layers"""
+        if not detected_layers:
+          return []
+        prompt = self._build_map_actions_prompt(query, context, map_state, detected_layers)
+        map_action_response = self.openai_service.get_response(prompt=prompt)
+        if map_action_response:
+          try:
+            parsed_response = json.loads(map_action_response.choices[0].message.content or "{}")
+            map_actions = parsed_response.get("map_actions", [])
+            return [MapActions(**action) for action in map_actions]
+          except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+            return []
+        return []
 
-    def _build_comprehensive_prompt(
-        self, query: str, context: ChatContext, map_state: MapState
+
+    def _build_map_actions_prompt(
+        self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None
     ) -> str:
         sw = map_state.map_position.southwest
         ne = map_state.map_position.northeast
@@ -69,6 +83,9 @@ CURRENT MAP STATE:
 
 CONVERSATION CONTEXT:
 {chat_history}
+
+DETECTED LAYERS:
+{detected_layers}
 
 USER QUERY: "{query}"
 

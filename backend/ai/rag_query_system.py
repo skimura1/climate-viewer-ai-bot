@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 # Import the DocumentChunk model
 import sys
 import os
+from models.chat import ChatContext, MapState, RAGMetadata, RAGResponse
 # Add the backend directory to the path so we can import models
 backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, backend_dir)
@@ -241,7 +242,7 @@ class ClimateRAGSystem:
             return chunks
 
     def build_context_prompt(
-        self, query: str, chunks: list[dict[str, Any]]
+        self, query: str, chunks: list[dict[str, Any]], chat_context: ChatContext, map_state: MapState
     ) -> str:
         """
         Build the context prompt from retrieved chunks.
@@ -249,6 +250,8 @@ class ClimateRAGSystem:
         Args:
             query: User's question
             chunks: Retrieved document chunks
+            chat_context: Chat context
+            map_state: Map state
 
         Returns:
             Formatted prompt string
@@ -281,12 +284,24 @@ class ClimateRAGSystem:
 
         context = "\n".join(context_parts)
 
+        chat_history = f"Chat History: {chat_context.messages}"
+        basemap_info = f"Current Basemap: {map_state.basemap_name}"
+        if map_state.active_layers:
+            layer_info = "Currently displayed layers:\n"
+            for layer in map_state.active_layers:
+                layer_info += f"    {layer}\n"
+        else:
+            layer_info = "No layers currently displayed."
+
         # Build the full prompt
         prompt = f"""You are a helpful climate assistant for Hawaii who is an expert in sea level rise and coastal flooding. Your job is to make scientific research about sea level rise and coastal flooding easy to understand for everyone—from students to homeowners to policymakers. You also will guide users in using the CRC Climate Viewer to answer their questions.
 
 === RETRIEVED SCIENTIFIC LITERATURE ===
-
 {context}
+
+=== CURRENT MAP STATE ===
+{basemap_info}
+{layer_info}
 
 === LAYER DEFINITIONS (for reference) ===
 
@@ -304,9 +319,12 @@ class ClimateRAGSystem:
 7. **annual_high_wave_flooding** - Coastal flooding from large waves
 8. **emergent_and_shallow_groundwater** - Groundwater very close to the surface
 
+=== CONVERSATION CONTEXT ===
+{chat_history}
+
 === YOUR ROLE ===
 
-Answer this question in a friendly, conversational way: **{query}**
+Answer the user's question in a friendly, conversational way: **{query}**
 
 === HOW TO RESPOND ===
 
@@ -360,12 +378,14 @@ Begin your response: """
     def generate_response(
         self,
         query: str,
+        context: ChatContext,
+        map_state: MapState,
         top_k: int = 10,
         layers: list[str] | None = None,
         min_confidence: str = "MEDIUM",
         temperature: float = 0.0,
         auto_detect_layers: bool = True,
-    ) -> dict[str, Any]:
+    ) -> RAGResponse:
         """
         Generate a RAG response to a user query.
 
@@ -401,21 +421,24 @@ Begin your response: """
         )
 
         if not chunks:
-            return {
-                "answer": "No relevant information found in the database for this query.",
-                "sources": [],
-                "metadata": {
-                    "chunks_retrieved": 0,
-                    "model": self.model,
-                    "query": query,
-                },
-            }
+            return RAGResponse(
+                response="No relevant information found in the database for this query.",
+                sources=[],
+                metadata=RAGMetadata(
+                    chunks_retrieved=0,
+                    model=self.model,
+                    embedding_model=self.embedding_model,
+                    query=query,
+                    filters={"layers": layers, "min_confidence": min_confidence},
+                    auto_detected_layers=detected_layers
+                )
+            )
 
         print(f"✅ Retrieved {len(chunks)} chunks")
 
         # Step 2: Build prompt with context
         print("📝 Building context prompt...")
-        prompt = self.build_context_prompt(query, chunks)
+        prompt = self.build_context_prompt(query, chunks, context, map_state)
 
         # Step 3: Generate response with GPT-4o
         print(f"🤖 Generating response with {self.model}...")
@@ -453,36 +476,34 @@ Begin your response: """
             },
         }
 
-        return result
+        return RAGResponse(response=result["answer"], sources=result["sources"], metadata=result["metadata"])
 
-    def print_response(self, result: dict[str, Any]):
+    def print_response(self, result: RAGResponse):
         """Pretty print a RAG response."""
         print("\n" + "=" * 80)
         print("ANSWER")
         print("=" * 80)
-        print(result["answer"])
+        print(result.response)
 
         print("\n" + "=" * 80)
-        print(f"SOURCES ({len(result['sources'])} documents)")
+        print(f"SOURCES ({len(result.sources)} documents)")
         print("=" * 80)
 
-        for source in result["sources"]:
-            print(f"\n[{source['source_number']}] {source['filename']}")
-            print(f"    Confidence: {source['confidence']}")
-            print(f"    Similarity: {source['similarity_score']:.4f}")
-            print(f"    Layers: {', '.join(source['layers'])}")
-            if source['locations']:
-                print(f"    Locations: {', '.join(source['locations'])}")
-            if source['measurements']:
-                print(
-                    f"    Measurements: {', '.join(source['measurements'][:3])}..."
-                )
+        for source in result.sources:
+            print(f"\n[{source.source_number}] {source.filename}")
+            print(f"    Confidence: {source.confidence}")
+            print(f"    Similarity: {source.similarity_score:.4f}")
+            print(f"    Layers: {', '.join(source.layers)}")
+            if source.locations:
+                print(f"    Locations: {', '.join(source.locations)}")
+            if source.measurements:
+                print(f"    Measurements: {', '.join(source.measurements[:3])}...")
 
         print("\n" + "=" * 80)
         print("METADATA")
         print("=" * 80)
-        print(f"Model: {result['metadata']['model']}")
-        print(f"Chunks Retrieved: {result['metadata']['chunks_retrieved']}")
-        print(f"Filters: {result['metadata']['filters']}")
-        if result['metadata'].get('auto_detected_layers'):
-            print(f"Auto-detected Layers: {', '.join(result['metadata']['auto_detected_layers'])}")
+        print(f"Model: {result.metadata.model}")
+        print(f"Chunks Retrieved: {result.metadata.chunks_retrieved}")
+        print(f"Filters: {result.metadata.filters}")
+        if result.metadata.auto_detected_layers:
+            print(f"Auto-detected Layers: {', '.join(result.metadata.auto_detected_layers)}")

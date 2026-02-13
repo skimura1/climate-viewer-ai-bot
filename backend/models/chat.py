@@ -20,6 +20,9 @@ class MapState(BaseModel):
     basemap_name: str
     available_basemaps: list[str]
 
+class MapActions(BaseModel):
+    type: str
+    parameters: dict[str, Any]
 
 class Message(BaseModel):
     id: str
@@ -41,3 +44,26 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     map_actions: list[dict[str, Any]] | None = None
+
+class RAGMetadata(BaseModel):
+    chunks_retrieved: int
+    model: str
+    embedding_model: str
+    query: str
+    filters: dict[str, Any]
+    auto_detected_layers: list[str] | None
+
+class RAGSource(BaseModel):
+    source_number: int
+    filename: str
+    confidence: str
+    layers: list[str]
+    similarity_score: float
+    locations: list[str]
+    measurements: list[str]
+    text_preview: str
+
+class RAGResponse(BaseModel):
+    response: str
+    sources: list[RAGSource]
+    metadata: RAGMetadata
