@@ -31,3 +31,29 @@ USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
 
 CREATE INDEX ON chunks (layer_id);
+
+-- Create table for document chunks (used by RAG system)
+CREATE TABLE IF NOT EXISTS public.document_chunks (
+    id SERIAL PRIMARY KEY,
+    chunk_id VARCHAR(255) UNIQUE NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    embedding vector(1536),
+    filename VARCHAR(500) NOT NULL,
+    source_file VARCHAR(500),
+    relevant INTEGER DEFAULT 1,
+    confidence VARCHAR(50),
+    relevant_layers TEXT[],
+    reasoning TEXT,
+    key_findings JSONB,
+    locations TEXT[],
+    slr_projections TEXT[],
+    measurements TEXT[],
+    timeframes TEXT[]
+);
+
+CREATE INDEX ON document_chunks (chunk_id);
+CREATE INDEX ON document_chunks (filename);
+CREATE INDEX ON document_chunks (confidence);
+CREATE INDEX ON document_chunks USING gin (relevant_layers);
+CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
