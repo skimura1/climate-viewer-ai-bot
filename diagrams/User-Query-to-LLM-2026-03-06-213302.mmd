@@ -1,0 +1,15 @@
+graph LR
+    A[User Query] --> B{OpenAI Text Embedder<br/>text-embedding-3-small}
+    B --> C[Query Vector<br/>1536-dim]
+    C --> D{Cosine Similarity<br/>Search<br/>Top-K=5}
+    E[(Vector Database<br/>PostgreSQL + pgvector)] --> D
+    D --> F[Top-K Relevant<br/>Chunks]
+    F --> G[Retrieved Context<br/>+ Metadata]
+    G --> H[Prompt Engineering<br/>Context + Query]
+    H --> I{LLM Generation<br/>GPT-4o}
+    I --> J[Final Response<br/>to User]
+    
+    style B fill:#e3f2fd
+    style D fill:#e3f2fd
+    style I fill:#e3f2fd
+    style E fill:#f5f5f5

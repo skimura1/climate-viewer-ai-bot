@@ -1,0 +1,14 @@
+graph TD
+    A[Research Papers<br/>PDF Documents] --> B{Gemini 2.5 Flash<br/>Text Extraction}
+    B --> C[Sanitized Markdown<br/>Citations removed<br/>Hawaiian terms preserved]
+    C --> D{Text Chunking<br/>Sentence-based splitting}
+    D --> E[Document Chunks<br/>with Metadata<br/>filename, layer_id]
+    E --> F{OpenAI Embeddings<br/>text-embedding-3-small<br/>1536 dimensions}
+    F --> G[Vector Embeddings<br/>+ Text + Metadata]
+    G --> H{PostgreSQL INSERT<br/>pgvector extension}
+    H --> I[(Vector Database<br/>PostgreSQL + pgvector<br/>Cosine similarity index)]
+    
+    style B fill:#e8f4f8,stroke:#0288d1,stroke-width:2px
+    style F fill:#e8f4f8,stroke:#0288d1,stroke-width:2px
+    style H fill:#e8f4f8,stroke:#0288d1,stroke-width:2px
+    style I fill:#f5f5f5,stroke:#666,stroke-width:2px

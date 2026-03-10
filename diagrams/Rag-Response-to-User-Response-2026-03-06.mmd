@@ -1,0 +1,17 @@
+flowchart TD
+    Start([User Query]) --> Process[process_query]
+    Process --> GetContext[Get Context from ContextManager]
+    GetContext --> RAG[Generate RAG Response]
+    RAG --> CheckLayers{Detected Layers?}
+    
+    CheckLayers -->|Yes| GenActions[Generate Map Actions<br/>for each layer]
+    CheckLayers -->|No| EmptyActions[Empty Actions List]
+    
+    GenActions --> UpdateContext[Update Context Manager]
+    EmptyActions --> UpdateContext
+    
+    UpdateContext --> Return[Return ChatResponse]
+    Return --> End([Response to User])
+    
+    style Process fill:#1a4d5c,stroke:#2d7a8f,color:#fff
+    style RAG fill:#5c4d1a,stroke:#

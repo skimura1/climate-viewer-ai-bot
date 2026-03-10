@@ -1,0 +1,14 @@
+graph TD
+    A[Raw Documentation Text<br/><small>layer_id, description</small>]
+    A --> B{Sentence Splitter<br/>max_sentences=3}
+    B --> C[Text Chunks<br/>with layer_id]
+    C --> D{OpenAI Text Embedder<br/>text-embedding-3-small}
+    D --> E[1536-dim Vector<br/>Embeddings]
+    E --> F[Chunks + Embeddings<br/>+ layer_id]
+    F --> G{PostgreSQL INSERT}
+    G --> H[(Vector Database<br/>PostgreSQL + pgvector)]
+    
+    style B fill:#e3f2fd
+    style D fill:#e3f2fd
+    style G fill:#e3f2fd
+    style H fill:#f5f5f5
