@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: climate-viewer-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - climate-network
+
   postgres:
     image: pgvector/pgvector:pg15
     container_name: climate-viewer-postgres
