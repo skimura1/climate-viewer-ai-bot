@@ -10,6 +10,7 @@ class ClimateAgent:
     """Single Climate Agent Handling Climate Queries"""
 
     def __init__(self, ai_service: AIService | None = None):
+        # TODO: Allow other AI services to be used
         self.ai_service = ai_service or OpenAIService()
         self.context_manager = ContextManager()
         self.rag_system = ClimateRAGSystem()
