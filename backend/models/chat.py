@@ -3,9 +3,13 @@ from typing import Any
 from pydantic import BaseModel
 
 
+class LatLng(BaseModel):
+    lat: float
+    lng: float
+
 class MapBounds(BaseModel):
-    southwest: list[float]
-    northeast: list[float]
+    southwest: LatLng
+    northeast: LatLng
 
 class MapCenter(BaseModel):
     lat: float

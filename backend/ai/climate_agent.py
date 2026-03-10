@@ -2,15 +2,15 @@ import json
 from typing import List
 from ai.context_manager import ContextManager
 from models.chat import ChatContext, ChatResponse, MapActions, MapState
-from service.open_ai_service import OpenAIService
+from service.ai_service import AIService, OpenAIService
 from ai.rag_query_system import ClimateRAGSystem
 
 
 class ClimateAgent:
     """Single Climate Agent Handling Climate Queries"""
 
-    def __init__(self):
-        self.openai_service = OpenAIService()
+    def __init__(self, ai_service: AIService | None = None):
+        self.ai_service = ai_service or OpenAIService()
         self.context_manager = ContextManager()
         self.rag_system = ClimateRAGSystem()
 
@@ -29,10 +29,11 @@ class ClimateAgent:
         if not detected_layers:
           return []
         prompt = self._build_map_actions_prompt(query, context, map_state, detected_layers)
-        map_action_response = self.openai_service.get_response(prompt=prompt)
+        map_action_response = self.ai_service.get_response(prompt=prompt)
         if map_action_response:
           try:
-            parsed_response = json.loads(map_action_response.choices[0].message.content or "{}")
+            content = map_action_response.choices[0].message.content or "{}"
+            parsed_response = json.loads(content)
             map_actions = parsed_response.get("map_actions", [])
             return [MapActions(**action) for action in map_actions]
           except json.JSONDecodeError as e:
@@ -46,13 +47,13 @@ class ClimateAgent:
     ) -> str:
         sw = map_state.map_position.southwest
         ne = map_state.map_position.northeast
-        center_lat = (sw[0] + ne[0]) / 2
-        center_long = (sw[1] + ne[1]) / 2
+        center_lat = (sw.lat + ne.lat) / 2
+        center_long = (sw.lng + ne.lng) / 2
 
         bounds_info = (
             f"Map Position Bounds:\n"
-            f"        Southwest: {sw}\n"
-            f"        Northeast: {ne}"
+            f"        Southwest: {sw.lat}, {sw.lng}\n"
+            f"        Northeast: {ne.lat}, {ne.lng}"
         )
 
         center_info = f"Map Center: lat: {center_lat:.4f}, long: {center_long:.4f}"
