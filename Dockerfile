@@ -22,6 +22,6 @@ COPY backend/ ./backend/
 
 EXPOSE 8000
 
-# Run uvicorn from inside the backend directory so relative imports resolve
+# Run uvicorn directly from the venv to avoid uv re-syncing dev dependencies
 WORKDIR /app/backend
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
