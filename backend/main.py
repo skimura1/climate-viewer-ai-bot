@@ -14,8 +14,14 @@ open_ai_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-origins = ["http://localhost:3000", "https://localhost:3000",
-"http://localhost:5173", "https://localhost:5173"]
+origins = [
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "http://soest.hawaii.edu",
+    "https://soest.hawaii.edu",
+]
 
 app.add_middleware(
     CORSMiddleware,
