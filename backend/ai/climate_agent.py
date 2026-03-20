@@ -74,6 +74,29 @@ class ClimateAgent:
         else:
             layer_info = "No data layers currently displayed."
 
+        if map_state.available_increment_layers:
+          increment_layers_info = "AVAILABLE INCREMENTAL FLOODING LAYERS (use specific foot levels):\n"
+          for layer in map_state.available_increment_layers:
+            increment_layers_info += f"- {layer}\n"
+        else:
+          increment_layers_info = "NO AVAILABLE INCREMENTAL FLOODING LAYERS."
+
+        available_normal_layers = map_state.available_normal_layers
+        if available_normal_layers:
+            available_normal_layers_info = "AVAILABLE NORMAL LAYERS (do not use foot levels):\n"
+            for layer in available_normal_layers:
+                available_normal_layers_info += f"- {layer}\n"
+        else:
+            available_normal_layers_info = "NO AVAILABLE NORMAL LAYERS."
+
+        available_basemaps = map_state.available_basemaps
+        if available_basemaps:
+            available_basemaps_info = "Available basemaps:\n"
+            for basemap in available_basemaps:
+                available_basemaps_info += f"- {basemap}\n"
+        else:
+            available_basemaps_info = "No available basemaps."
+
         return f"""
 You are a Hawaiian climate data assistant. Analyze the user's query and provide helpful responses with appropriate map actions.
 
@@ -163,27 +186,22 @@ AVAILABLE ACTIONS:
   }}
 }}
 
-INCREMENTAL FLOODING LAYERS (use specific foot levels):
-{map_state.available_layers}
+7. SET_FOOT_INCREMENT - Set foot increment
+{{
+  "type": "set_foot_increment",
+  "parameters": {{
+    "foot_increment": "foot_increment",
+    "reason": "Why changing the foot increment"
+  }}
+}}
 
-AVAILABLE BASEMAP IDS:
-{map_state.available_basemaps}
+{increment_layers_info}
+
+{available_normal_layers_info}
 
 SPECIFIC LOCATIONS:
 - Koolaupoko: {{"southwest": [21.25, -157.9], "northeast": [21.35, -157.7]}}
 - Waikiki: {{"southwest": [21.26, -157.83], "northeast": [21.28, -157.81]}}
-
-ACTION SELECTION GUIDELINES:
-1. For temperature queries: Use temperature_annual or temperature_seasonal
-2. For rainfall/drought: Use precipitation layers or drought_severity
-3. For flooding/sea level rise: Use specific incremental flooding layers (e.g., flooding_passive_gwi_03ft for 3-foot flooding)
-4. For flooding scenarios: Choose appropriate foot level based on user query (0-10ft available)
-5. For flooding comparisons: Add multiple specific flood levels (e.g., flooding_passive_gwi_01ft and flooding_passive_gwi_05ft)
-6. For specific islands: Set bounds to focus on that island
-7. For comparisons: Add multiple relevant layers with exact names
-8. For temporal analysis: Set appropriate time ranges
-9. Clear existing layers if starting a new analysis topic
-10. Highlight areas when pointing out specific phenomena or risks
 
 FLOODING LAYER SELECTION EXAMPLES:
 - "1 foot of flooding" → use "flooding_passive_gwi_01ft"

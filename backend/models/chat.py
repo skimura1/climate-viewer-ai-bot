@@ -17,12 +17,14 @@ class MapCenter(BaseModel):
 
 class MapState(BaseModel):
     active_layers: list[str] | None
-    available_layers: list[str] | None
+    available_increment_layers: list[str] | None
+    available_normal_layers: list[str] | None
     foot_increment: str
     map_position: MapBounds
     zoom_level: int
     basemap_name: str
     available_basemaps: list[str]
+
 
 class MapActions(BaseModel):
     type: str
