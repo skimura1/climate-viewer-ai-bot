@@ -90,7 +90,7 @@ class ClimateAgent:
           available_normal_layers_info = "NO AVAILABLE NORMAL LAYERS."
 
         return f"""
-You are a Hawaiian climate data assistant. Analyze the user's query and provide helpful responses with appropriate map actions.
+You are the map action engine for the CRC Climate Viewer. The text response has already been generated (see RAG RESPONSE below) and assumes the map is acting in response to the user. Your job is to produce the map actions that fulfill that assumption—adding layers, navigating to locations, setting zoom levels, etc.—so that the map matches what the response text implies is happening.
 
 RAG RESPONSE:
 {response_info}
@@ -100,6 +100,39 @@ CURRENT MAP STATE:
 {center_info}
 {layer_info}
 {basemap_info}
+Current foot increment: {map_state.foot_increment} ft above MHHW (2000 baseline)
+
+SEA LEVEL RISE SCENARIO — FOOT INCREMENT TO YEAR MAPPING:
+Use this table when the user mentions a year or time horizon to pick the right SET_FOOT_INCREMENT value.
+Note: Year projections are based on local projections for Moku O Loʻe Island (Coconut Island) per the 2022 Hawaiʻi Sea Level Rise Technical Report. Timing varies slightly by location.
+
+Intermediate scenario:
+  0 ft = Baseline (2000)
+  1 ft = ~2050
+  2 ft = ~2075
+  3 ft = ~2100
+  4 ft = ~2100
+  5 ft = ~2125
+  6 ft = ~2125
+  7 ft = ~2150
+  8 ft = ~2150
+  9 ft = beyond 2150
+  10 ft = beyond 2150
+
+Intermediate-High scenario (more aggressive — dates arrive sooner):
+  0 ft = Baseline (2000)
+  1 ft = ~2040
+  2 ft = ~2060
+  3 ft = between 2060 and 2080
+  4 ft = ~2080
+  5 ft = between 2080 and 2100
+  6 ft = ~2100
+  7 ft = between 2100 and 2150
+  8 ft = between 2100 and 2150
+  9 ft = between 2100 and 2150
+  10 ft = ~2150
+
+If the user asks about a year (e.g. "by 2100"), set the foot increment to the value that corresponds to that year under the Intermediate scenario (default), unless the user specifies Intermediate-High.
 
 CONVERSATION CONTEXT:
 {chat_history}
