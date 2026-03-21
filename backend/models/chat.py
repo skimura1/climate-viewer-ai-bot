@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LatLng(BaseModel):
@@ -15,11 +15,14 @@ class MapCenter(BaseModel):
     lat: float
     long: float
 
+class AvailableLayers(BaseModel):
+    normal: list[str] | None
+    increment: list[str] | None
+
 class MapState(BaseModel):
     active_layers: list[str] | None
-    available_increment_layers: list[str] | None
-    available_normal_layers: list[str] | None
-    foot_increment: str
+    available_layers: AvailableLayers | None
+    foot_increment: int
     map_position: MapBounds
     zoom_level: int
     basemap_name: str

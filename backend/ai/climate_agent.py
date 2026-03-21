@@ -1,7 +1,7 @@
 import json
 from typing import List
 from ai.context_manager import ContextManager
-from models.chat import ChatContext, ChatResponse, MapActions, MapState
+from models.chat import ChatContext, ChatResponse, MapActions, MapState, RAGResponse
 from service.ai_service import AIService, OpenAIService
 from ai.rag_query_system import ClimateRAGSystem
 
@@ -21,15 +21,13 @@ class ClimateAgent:
         context = await self.context_manager.get_context(session_id)
         rag_response = self.rag_system.generate_response(query=query, context=context, map_state=map_state)
         detected_layers = rag_response.metadata.auto_detected_layers
-        map_actions = self._generate_map_actions(query, context, map_state, detected_layers)
+        map_actions = self._generate_map_actions(query, context, map_state, detected_layers, rag_response)
         await self.context_manager.update_context(session_id, query, rag_response.response)
         return ChatResponse(response=rag_response.response, map_actions=[action.model_dump() for action in map_actions])
 
-    def _generate_map_actions(self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None) -> List[MapActions]:
-        """Generate map actions based on detected layers"""
-        if not detected_layers:
-          return []
-        prompt = self._build_map_actions_prompt(query, context, map_state, detected_layers)
+    def _generate_map_actions(self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None, rag_response: RAGResponse) -> List[MapActions]:
+        """Generate map actions based on RAG response"""
+        prompt = self._build_map_actions_prompt(query, context, map_state, detected_layers, rag_response)
         map_action_response = self.ai_service.get_response(prompt=prompt)
         if map_action_response:
           try:
@@ -44,8 +42,11 @@ class ClimateAgent:
 
 
     def _build_map_actions_prompt(
-        self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None
+        self, query: str, context: ChatContext, map_state: MapState, detected_layers: list[str] | None, rag_response: RAGResponse
     ) -> str:
+        """Build the map actions prompt"""
+        response_info = f"Response: {rag_response.response}"
+
         sw = map_state.map_position.southwest
         ne = map_state.map_position.northeast
         center_lat = (sw.lat + ne.lat) / 2
@@ -74,31 +75,25 @@ class ClimateAgent:
         else:
             layer_info = "No data layers currently displayed."
 
-        if map_state.available_increment_layers:
+        if map_state.available_layers and map_state.available_layers.increment:
           increment_layers_info = "AVAILABLE INCREMENTAL FLOODING LAYERS (use specific foot levels):\n"
-          for layer in map_state.available_increment_layers:
+          for layer in map_state.available_layers.increment:
             increment_layers_info += f"- {layer}\n"
         else:
           increment_layers_info = "NO AVAILABLE INCREMENTAL FLOODING LAYERS."
 
-        available_normal_layers = map_state.available_normal_layers
-        if available_normal_layers:
-            available_normal_layers_info = "AVAILABLE NORMAL LAYERS (do not use foot levels):\n"
-            for layer in available_normal_layers:
-                available_normal_layers_info += f"- {layer}\n"
+        if map_state.available_layers and map_state.available_layers.normal:
+          available_normal_layers_info = "AVAILABLE NORMAL LAYERS (do not use foot levels):\n"
+          for layer in map_state.available_layers.normal:
+            available_normal_layers_info += f"- {layer}\n"
         else:
-            available_normal_layers_info = "NO AVAILABLE NORMAL LAYERS."
-
-        available_basemaps = map_state.available_basemaps
-        if available_basemaps:
-            available_basemaps_info = "Available basemaps:\n"
-            for basemap in available_basemaps:
-                available_basemaps_info += f"- {basemap}\n"
-        else:
-            available_basemaps_info = "No available basemaps."
+          available_normal_layers_info = "NO AVAILABLE NORMAL LAYERS."
 
         return f"""
 You are a Hawaiian climate data assistant. Analyze the user's query and provide helpful responses with appropriate map actions.
+
+RAG RESPONSE:
+{response_info}
 
 CURRENT MAP STATE:
 {bounds_info}
@@ -118,7 +113,6 @@ RESPONSE FORMAT:
 You MUST respond with valid JSON in this exact structure:
 
 {{
-  "response": "Your detailed, helpful response about Hawaiian climate data",
   "map_actions": [
     {{
       "type": "action_type",
@@ -133,8 +127,7 @@ AVAILABLE ACTIONS:
 {{
   "type": "add_layer",
   "parameters": {{
-    "layer_name": "exact_layer_identifier",
-    "display_name": "Human-readable layer name",
+    "layer_name": "layer_name",
     "reason": "Why this layer helps answer the query"
   }}
 }}
@@ -190,7 +183,7 @@ AVAILABLE ACTIONS:
 {{
   "type": "set_foot_increment",
   "parameters": {{
-    "foot_increment": "foot_increment",
+    "foot_increment": 4,
     "reason": "Why changing the foot increment"
   }}
 }}
@@ -203,13 +196,6 @@ SPECIFIC LOCATIONS:
 - Koolaupoko: {{"southwest": [21.25, -157.9], "northeast": [21.35, -157.7]}}
 - Waikiki: {{"southwest": [21.26, -157.83], "northeast": [21.28, -157.81]}}
 
-FLOODING LAYER SELECTION EXAMPLES:
-- "1 foot of flooding" → use "flooding_passive_gwi_01ft"
-- "minor flooding" → use "flooding_passive_gwi_01ft" or "flooding_passive_gwi_02ft"
-- "moderate flooding" → use "flooding_passive_gwi_03ft" to "flooding_passive_gwi_05ft"
-- "severe flooding" → use "flooding_passive_gwi_06ft" to "flooding_passive_gwi_10ft"
-- "compare flood levels" → add multiple specific layers like "flooding_passive_gwi_02ft" and "flooding_passive_gwi_06ft"
-
 COORDINATE VALIDATION:
 - Hawaii bounds: Southwest: [22.5, -154.0], Northeast: [18.5, -161.0]
 - Ensure all coordinates fall within these bounds
@@ -217,64 +203,7 @@ COORDINATE VALIDATION:
 CRITICAL RULES:
 1. Return ONLY valid JSON - no markdown formatting, no code blocks, no extra text
 2. Include 1-4 actions maximum per response
-3. Always provide a helpful "response" field explaining your analysis
+3. Only return map_actions, no response text needed
 4. Use exact layer names from the available list
 5. Validate coordinates are within Hawaii bounds
 6. Provide clear reasons for each action"""
-
-    def _format_response(self, response: str | None) -> ChatResponse:
-        """Parse AI response and return structured ChatResponse"""
-        if response is None:
-            return ChatResponse(response="No response received from AI service", map_actions=None)
-
-        response = response.strip()
-
-        json_start = response.find('{')
-        json_end = response.rfind('}') + 1
-
-        if json_start != -1 and json_end > json_start:
-            json_content = response[json_start:json_end]
-        else:
-            json_content = response
-
-        try:
-            parsed = json.loads(json_content)
-
-            if not isinstance(parsed, dict):
-                raise ValueError("Response must be a JSON object")
-
-            ai_response = parsed.get("response", "")
-            map_actions = parsed.get("map_actions", [])
-
-            if map_actions and isinstance(map_actions, list):
-                validated_actions = []
-                for action in map_actions:
-                    if isinstance(action, dict) and "type" in action:
-                        validated_actions.append(action)
-                    else:
-                        print(f"Warning: Invalid action format: {action}")
-                map_actions = validated_actions
-            else:
-                map_actions = []
-
-            return ChatResponse(
-                response=ai_response if ai_response else "I can help with Hawaiian climate data analysis.",
-                map_actions=map_actions if map_actions else None
-            )
-
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-            if response:
-                clean_response = response.replace('```json', '').replace('```', '').strip()
-                return ChatResponse(
-                    response=clean_response if len(clean_response) > 10 else "I encountered an issue processing your request. Could you please rephrase?",
-                    map_actions=None
-                )
-            return ChatResponse(response="Unable to process the request", map_actions=None)
-
-        except (ValueError, KeyError) as e:
-            print(f"Response validation error: {e}")
-            return ChatResponse(
-                response="I had trouble formatting my response. Let me try again with your question.",
-                map_actions=None
-            )
