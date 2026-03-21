@@ -21,6 +21,8 @@ origins = [
     "https://localhost:5173",
     "http://soest.hawaii.edu",
     "https://soest.hawaii.edu",
+    "http://www.soest.hawaii.edu",
+    "https://www.soest.hawaii.edu",
 ]
 
 app.add_middleware(
